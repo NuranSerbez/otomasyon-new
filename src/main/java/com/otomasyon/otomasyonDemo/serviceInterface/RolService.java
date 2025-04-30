@@ -1,21 +1,17 @@
 package com.otomasyon.otomasyonDemo.serviceInterface;
 
-import com.otomasyon.otomasyonDemo.dto.RolDTO;
 import com.otomasyon.otomasyonDemo.entity.Rol;
+import com.otomasyon.otomasyonDemo.requestDTO.RolRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.RolResponseDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface RolService {
-    List<RolDTO> findAll();
-
-    Optional<RolDTO> findById(Long id);
-
-    RolDTO save(RolDTO rolDTO);
-
-    RolDTO update(Long id, RolDTO rolDTO);
-
+    List<RolResponseDTO> findAll();
+    Optional<RolResponseDTO> findById(Long id);
+    RolResponseDTO save(RolRequestDTO rolDTO);
+    RolResponseDTO update(Long id, RolRequestDTO rolDTO);
     void deleteById(Long id);
-
-    Optional<Object> findByRolTuru(Rol.RolTuru rolTuru);
+    Optional<Rol> findByRolTuru(Rol.RolTuru rolTuru);
 }

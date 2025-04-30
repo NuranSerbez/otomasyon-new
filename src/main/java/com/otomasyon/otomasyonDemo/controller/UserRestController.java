@@ -53,7 +53,7 @@ public class UserRestController {
     @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/delete/{id}")
     public String deleteUser(@PathVariable Long id) {
-        userService.findById(id); // Varsa kontrol et
+        userService.findById(id);
         userService.deleteById(id);
         return "Kullanıcı silindi.";
     }

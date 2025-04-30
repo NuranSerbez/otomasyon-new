@@ -15,5 +15,5 @@ public class UserResponseDTO {
     private String adres;
     private String telefon;
     private boolean sifreGuncelligi;
-    private String rol; // Enum değer (String'e maplenecek)
+    private String rol;
 }

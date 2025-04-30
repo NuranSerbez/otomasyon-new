@@ -1,6 +1,8 @@
 package com.otomasyon.otomasyonDemo.controller;
 
-import com.otomasyon.otomasyonDemo.dto.RolDTO;
+import com.otomasyon.otomasyonDemo.entity.Rol;
+import com.otomasyon.otomasyonDemo.requestDTO.RolRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.RolResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.RolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,31 +25,31 @@ public class RolRestController {
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/all")
-    public List<RolDTO> findAll() {
+    public List<RolResponseDTO> findAll() {
         return rolService.findAll();
     }
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @GetMapping("/id/{id}")
-    public RolDTO getRol(@PathVariable Long id) {
+    public RolResponseDTO getRol(@PathVariable Long id) {
         return rolService.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol bulunamadı."));
     }
 
     @PreAuthorize("hasRole('Idareci')")
     @PostMapping("/add")
-    public RolDTO addRol(@RequestBody RolDTO rolDTO) {
+    public RolResponseDTO addRol(@RequestBody RolRequestDTO rolDTO) {
+        validateRolTuru(rolDTO.getRolTuru());
         return rolService.save(rolDTO);
     }
 
     @PreAuthorize("hasRole('Idareci')")
     @PutMapping("/update/{id}")
-    public RolDTO updateRol(@PathVariable Long id, @RequestBody RolDTO rolDTO) {
-        RolDTO mevcutRol = rolService.findById(id)
+    public RolResponseDTO updateRol(@PathVariable Long id, @RequestBody RolRequestDTO rolDTO) {
+        validateRolTuru(rolDTO.getRolTuru());
+        RolResponseDTO mevcutRol = rolService.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Güncellenecek rol bulunamadı."));
-
-        mevcutRol.setRolTuru(rolDTO.getRolTuru());
-        return rolService.update(id, mevcutRol);
+        return rolService.update(id, rolDTO);
     }
 
     @PreAuthorize("hasRole('Idareci')")
@@ -57,5 +59,13 @@ public class RolRestController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol bulunamadı."));
         rolService.deleteById(id);
         return "Rol silindi.";
+    }
+
+    private void validateRolTuru(String rolTuruStr) {
+        try {
+            Rol.RolTuru.valueOf(rolTuruStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Geçersiz rol türü.");
+        }
     }
 }

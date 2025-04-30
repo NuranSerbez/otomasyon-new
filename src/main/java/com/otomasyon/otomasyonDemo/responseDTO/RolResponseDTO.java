@@ -1,4 +1,4 @@
-package com.otomasyon.otomasyonDemo.requestDTO;
+package com.otomasyon.otomasyonDemo.responseDTO;
 
 import lombok.*;
 
@@ -6,6 +6,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RolRequestDTO {
+public class RolResponseDTO {
+    private Long id;
     private String rolTuru;
 }

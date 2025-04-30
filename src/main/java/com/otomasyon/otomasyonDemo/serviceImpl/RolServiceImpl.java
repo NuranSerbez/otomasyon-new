@@ -1,9 +1,10 @@
 package com.otomasyon.otomasyonDemo.serviceImpl;
 
-import com.otomasyon.otomasyonDemo.dto.RolDTO;
 import com.otomasyon.otomasyonDemo.entity.Rol;
 import com.otomasyon.otomasyonDemo.mapper.RolMapper;
 import com.otomasyon.otomasyonDemo.repository.RolRepository;
+import com.otomasyon.otomasyonDemo.requestDTO.RolRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.RolResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.RolService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,42 +15,45 @@ import java.util.stream.Collectors;
 
 @Service
 public class RolServiceImpl implements RolService {
-    private RolRepository rolRepository;
+
+    private final RolRepository rolRepository;
+    private final RolMapper rolMapper;
 
     @Autowired
-    public RolServiceImpl(RolRepository rolRepository) {
+    public RolServiceImpl(RolRepository rolRepository, RolMapper rolMapper) {
         this.rolRepository = rolRepository;
+        this.rolMapper = rolMapper;
     }
 
     @Override
-    public List<RolDTO> findAll() {
+    public List<RolResponseDTO> findAll() {
         return rolRepository.findAll()
                 .stream()
-                .map(RolMapper::toDTO)
+                .map(rolMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<RolDTO> findById(Long id) {
+    public Optional<RolResponseDTO> findById(Long id) {
         Rol rol = rolRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Rol bulunamadı."));
-        return Optional.of(RolMapper.toDTO(rol));
+        return Optional.of(rolMapper.toDTO(rol));
     }
 
     @Override
-    public RolDTO save(RolDTO rolDTO) {
-        Rol rol = RolMapper.toEntity(rolDTO);
+    public RolResponseDTO save(RolRequestDTO rolDTO) {
+        Rol rol = rolMapper.toEntity(rolDTO);
         Rol savedRol = rolRepository.save(rol);
-        return RolMapper.toDTO(savedRol);
+        return rolMapper.toDTO(savedRol);
     }
 
     @Override
-    public RolDTO update(Long id, RolDTO rolDTO) {
+    public RolResponseDTO update(Long id, RolRequestDTO rolDTO) {
         Rol rol = rolRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Güncellenecek rol bulunamadı."));
         rol.setRolTuru(Rol.RolTuru.valueOf(rolDTO.getRolTuru()));
         Rol updatedRol = rolRepository.save(rol);
-        return RolMapper.toDTO(updatedRol);
+        return rolMapper.toDTO(updatedRol);
     }
 
     @Override
@@ -60,7 +64,7 @@ public class RolServiceImpl implements RolService {
     }
 
     @Override
-    public Optional<Object> findByRolTuru(Rol.RolTuru rolTuru) {
+    public Optional<Rol> findByRolTuru(Rol.RolTuru rolTuru) {
         return Optional.ofNullable(rolRepository.findByRolTuru(rolTuru));
     }
 }

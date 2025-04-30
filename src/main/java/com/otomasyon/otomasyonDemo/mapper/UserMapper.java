@@ -8,7 +8,7 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    @Mapping(target = "rol", ignore = true) // Rol sonradan eklenecek
+    @Mapping(target = "rol", ignore = true)
     User toEntity(UserRequestDTO dto);
 
     @Mapping(source = "rol.rolTuru", target = "rol")
