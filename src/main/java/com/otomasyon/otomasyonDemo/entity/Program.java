@@ -30,4 +30,7 @@ public class Program {
     @OneToMany(mappedBy = "program")
     @JsonManagedReference("program-reference")
     private List<OgrenciProgrami> ogrenciProgramlari;
+
+    public class ProgramTuru {
+    }
 }

@@ -1,17 +1,18 @@
 package com.otomasyon.otomasyonDemo.mapper;
 
-import com.otomasyon.otomasyonDemo.dto.ProgramDTO;
 import com.otomasyon.otomasyonDemo.entity.Program;
+import com.otomasyon.otomasyonDemo.requestDTO.ProgramRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.ProgramResponseDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-public class ProgramMapper {
-    public static ProgramDTO toDTO(Program program){
-        ProgramDTO dto = new ProgramDTO();
-        dto.setProgramTuru(program.getProgramTuru());
-        return dto;
-    }
-    public static Program toEntity(ProgramDTO dto){
-        Program program = new Program();
-        program.setProgramTuru(dto.getProgramTuru());
-        return program;
-    }
+@Mapper(componentModel = "spring")
+public interface ProgramMapper {
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "bolumler", ignore = true)
+    @Mapping(target = "ogrenciProgramlari", ignore = true)
+    Program toEntity(ProgramRequestDTO dto);
+
+    ProgramResponseDTO toDTO(Program program);
 }

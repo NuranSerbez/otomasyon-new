@@ -1,10 +1,10 @@
 package com.otomasyon.otomasyonDemo.serviceImpl;
 
-import com.otomasyon.otomasyonDemo.dto.ProgramDTO;
 import com.otomasyon.otomasyonDemo.entity.Program;
 import com.otomasyon.otomasyonDemo.mapper.ProgramMapper;
-import com.otomasyon.otomasyonDemo.mapper.RolMapper;
 import com.otomasyon.otomasyonDemo.repository.ProgramRepository;
+import com.otomasyon.otomasyonDemo.requestDTO.ProgramRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.ProgramResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.ProgramService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,48 +15,52 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProgramServiceImpl implements ProgramService {
+
     private final ProgramRepository programRepository;
+    private final ProgramMapper programMapper;
 
     @Autowired
-    public ProgramServiceImpl(ProgramRepository programRepository) {
+    public ProgramServiceImpl(ProgramRepository programRepository, ProgramMapper programMapper) {
         this.programRepository = programRepository;
+        this.programMapper = programMapper;
     }
 
     @Override
-    public List<ProgramDTO> findAll() {
+    public List<ProgramResponseDTO> findAll() {
         return programRepository.findAll()
                 .stream()
-                .map(ProgramMapper::toDTO)
+                .map(programMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<ProgramDTO> findById(Long id) {
-        Program program = programRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("Program bulunamadı."));
-        return Optional.of(ProgramMapper.toDTO(program));
+    public Optional<ProgramResponseDTO> findById(Long id) {
+        return programRepository.findById(id)
+                .map(programMapper::toDTO);
     }
 
     @Override
-    public ProgramDTO save(ProgramDTO programDTO) {
-        Program program = ProgramMapper.toEntity(programDTO);
-        Program savedProgram = programRepository.save(program);
-        return ProgramMapper.toDTO(savedProgram);
+    public ProgramResponseDTO save(ProgramRequestDTO programDTO) {
+        Program program = programMapper.toEntity(programDTO);
+        Program saved = programRepository.save(program);
+        return programMapper.toDTO(saved);
     }
 
     @Override
-    public ProgramDTO update(Long id, ProgramDTO programDTO) {
-        Program program = programRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("Güncellenecek program bulunamadı."));
-        program.setProgramTuru(programDTO.getProgramTuru());
-        Program updatedProgram = programRepository.save(program);
-        return ProgramMapper.toDTO(updatedProgram);
+    public Optional<ProgramResponseDTO> update(Long id, ProgramRequestDTO programDTO) {
+        return programRepository.findById(id).map(program -> {
+            program.setProgramTuru(programDTO.getProgramTuru());
+            Program updated = programRepository.save(program);
+            return programMapper.toDTO(updated);
+        });
     }
 
     @Override
-    public void deleteById(Long id) {
+    public boolean deleteById(Long id) {
         if (programRepository.existsById(id)) {
             programRepository.deleteById(id);
+            return true;
         }
+        return false;
     }
 }

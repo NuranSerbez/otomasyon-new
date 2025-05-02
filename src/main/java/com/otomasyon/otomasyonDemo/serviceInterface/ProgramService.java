@@ -1,19 +1,19 @@
 package com.otomasyon.otomasyonDemo.serviceInterface;
 
-import com.otomasyon.otomasyonDemo.dto.ProgramDTO;
-import com.otomasyon.otomasyonDemo.entity.Program;
+import com.otomasyon.otomasyonDemo.requestDTO.ProgramRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.ProgramResponseDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ProgramService {
-    List<ProgramDTO> findAll();
+    List<ProgramResponseDTO> findAll();
 
-    Optional<ProgramDTO> findById(Long id);
+    Optional<ProgramResponseDTO> findById(Long id);
 
-    ProgramDTO save(ProgramDTO programDTO);
+    ProgramResponseDTO save(ProgramRequestDTO programDTO);
 
-    ProgramDTO update(Long id, ProgramDTO programDTO);
+    Optional<ProgramResponseDTO> update(Long id, ProgramRequestDTO programDTO);
 
-    void deleteById(Long id);
+    boolean deleteById(Long id);
 }

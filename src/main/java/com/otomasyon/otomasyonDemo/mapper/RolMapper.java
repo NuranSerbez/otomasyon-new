@@ -1,8 +1,8 @@
 package com.otomasyon.otomasyonDemo.mapper;
 
-import com.otomasyon.otomasyonDemo.dto.RolRequestDTO;
-import com.otomasyon.otomasyonDemo.dto.RolResponseDTO;
 import com.otomasyon.otomasyonDemo.entity.Rol;
+import com.otomasyon.otomasyonDemo.requestDTO.RolRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.RolResponseDTO;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")

@@ -1,10 +1,7 @@
 package com.otomasyon.otomasyonDemo.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.otomasyon.otomasyonDemo.dto.ProgramDTO;
-import com.otomasyon.otomasyonDemo.entity.Bolum;
-import com.otomasyon.otomasyonDemo.entity.Program;
-import com.otomasyon.otomasyonDemo.serviceInterface.BolumService;
+import com.otomasyon.otomasyonDemo.requestDTO.ProgramRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.ProgramResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.ProgramService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,55 +10,54 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/program")
 public class ProgramRestController {
-    private ProgramService programService;
-    private BolumService bolumService;
+
+    private final ProgramService programService;
 
     @Autowired
-    public ProgramRestController(ProgramService programService, BolumService bolumService) {
+    public ProgramRestController(ProgramService programService) {
         this.programService = programService;
-        this.bolumService = bolumService;
     }
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/all")
-    public List<ProgramDTO> findAll() {
+    public List<ProgramResponseDTO> findAll() {
         return programService.findAll();
     }
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-
-    @GetMapping("/id/{id}")
-    public ProgramDTO getProgram(@PathVariable Long id) {
+    @GetMapping("/{id}")
+    public ProgramResponseDTO getProgram(@PathVariable Long id) {
         return programService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Program bulunmadı."));
+                .map(program -> program)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Program bulunamadı."));
     }
 
     @PreAuthorize("hasAnyRole('Idareci','Akademisyen')")
-    @PostMapping("/add")
-    public ProgramDTO addProgram(@RequestBody ProgramDTO programDTO) {
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ProgramResponseDTO addProgram(@RequestBody ProgramRequestDTO programDTO) {
         return programService.save(programDTO);
     }
 
     @PreAuthorize("hasAnyRole('Idareci','Akademisyen')")
-    @PutMapping("/update/{id}")
-    public ProgramDTO updateProgram(@PathVariable Long id, @RequestBody ProgramDTO programDTO) {
-       ProgramDTO mevcutProgram = programService.findById(id)
-               .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Mevcut program bulunamadı."));
-       mevcutProgram.setProgramTuru(programDTO.getProgramTuru());
-       return programService.update(id, mevcutProgram);
+    @PutMapping("/{id}")
+    public ProgramResponseDTO updateProgram(@PathVariable Long id, @RequestBody ProgramRequestDTO programDTO) {
+        return programService.update(id, programDTO)
+                .map(updatedProgram -> updatedProgram)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Güncellenecek program bulunamadı."));
     }
 
     @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/{id}")
-    public String deleteProgram(@PathVariable Long id) {
-        programService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Program bulunamadı."));
-        programService.deleteById(id);
-        return "Program silindi.";
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteProgram(@PathVariable Long id) {
+        boolean deleted = programService.deleteById(id);
+        if (!deleted) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Program bulunamadı.");
+        }
     }
 }

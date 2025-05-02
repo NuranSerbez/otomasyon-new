@@ -65,6 +65,6 @@ public class RolServiceImpl implements RolService {
 
     @Override
     public Optional<Rol> findByRolTuru(Rol.RolTuru rolTuru) {
-        return Optional.ofNullable(rolRepository.findByRolTuru(rolTuru));
+        return rolRepository.findByRolTuru(rolTuru);
     }
 }

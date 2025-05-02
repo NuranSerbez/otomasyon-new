@@ -1,18 +1,20 @@
 package com.otomasyon.otomasyonDemo.serviceInterface;
 
-import com.otomasyon.otomasyonDemo.entity.Not;
+import com.otomasyon.otomasyonDemo.requestDTO.NotRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.NotResponseDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface NotService {
-    List<Not> findAll();
 
-    Optional<Not> findById(Long id);
+    List<NotResponseDTO> findAll();
 
-    Not save(Not theNot);
+    Optional<NotResponseDTO> findById(Long id);
 
-    Not update(Long id, Not theNot);
+    NotResponseDTO save(NotRequestDTO notDTO);
 
-    void deleteById(Long id);
+    Optional<NotResponseDTO> update(Long id, NotRequestDTO notDTO);
+
+    boolean deleteById(Long id);
 }

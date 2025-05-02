@@ -1,18 +1,19 @@
 package com.otomasyon.otomasyonDemo.serviceInterface;
 
-import com.otomasyon.otomasyonDemo.entity.OgrenciProgrami;
+import com.otomasyon.otomasyonDemo.requestDTO.OgrenciProgramiRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.OgrenciProgramiResponseDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface OgrenciProgramiService {
-    List<OgrenciProgrami> findAll();
+    List<OgrenciProgramiResponseDTO> findAll();
 
-    Optional <OgrenciProgrami> findById(Long id);
+    Optional <OgrenciProgramiResponseDTO> findById(Long id);
 
-    OgrenciProgrami save(OgrenciProgrami theOgrenciProgrami);
+    OgrenciProgramiResponseDTO save(OgrenciProgramiRequestDTO OgrenciProgramiDTO);
 
-    OgrenciProgrami update(Long id, OgrenciProgrami theOgrenciProgrami);
+    Optional <OgrenciProgramiResponseDTO> update(Long id, OgrenciProgramiRequestDTO OgrenciProgramiDTO);
 
-    void deleteById(Long id);
+    boolean deleteById(Long id);
 }

@@ -1,12 +1,14 @@
 package com.otomasyon.otomasyonDemo.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.otomasyon.otomasyonDemo.entity.Not;
+import com.otomasyon.otomasyonDemo.requestDTO.NotRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.NotResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.DersAtamaService;
 import com.otomasyon.otomasyonDemo.serviceInterface.NotService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -15,52 +17,40 @@ import java.util.List;
 public class NotRestController {
     private NotService notService;
     private DersAtamaService dersAtamaService;
-    private ObjectMapper objectMapper;
 
     @Autowired
-    public NotRestController(NotService notService, DersAtamaService dersAtamaService, ObjectMapper objectMapper) {
+    public NotRestController(NotService notService, DersAtamaService dersAtamaService) {
         this.notService = notService;
         this.dersAtamaService = dersAtamaService;
-        this.objectMapper = objectMapper;
     }
 
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
 
     @GetMapping("/all")
-    public List<Not> findAll() {
+    public List<NotResponseDTO> findAll() {
         return notService.findAll();
     }
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
 
     @GetMapping("/id/{id}")
-    public Not getNot(@PathVariable Long id) {
+    public NotResponseDTO getNot(@PathVariable Long id) {
         return notService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Not bulunamadı - " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Not bulunamadı: " + id));
     }
 
     @PreAuthorize("hasAnyRole('Idareci','Akademisyen')")
     @PostMapping("/add")
-    public Not addNot(@RequestBody Not theNot) {
-        theNot.setId(null);
-        Not dbNot = notService.save(theNot);
-        return dbNot;
+    public NotResponseDTO addNot(@RequestBody NotRequestDTO notDTO) {
+        return notService.save(notDTO);
     }
 
     @PreAuthorize("hasAnyRole('Idareci','Akademisyen')")
     @PutMapping("/update/{id}")
-    public Not updateNot(@PathVariable Long id, @RequestBody Not theNot) {
-        var not = notService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Not bulunamadı: " + id));
-        Long dersAtamaId = theNot.getDersAtama().getId();
-        var dersAtama = dersAtamaService.findById(dersAtamaId)
-                .orElseThrow(() -> new RuntimeException("Ders atama bulunamadı: " + dersAtamaId));
-        not.setVize(theNot.getVize());
-        not.setFinl(theNot.getFinl());
-        not.setOrtalama(theNot.getOrtalama());
-        not.setDersAtama(dersAtama);
-        return notService.save(not);
+    public NotResponseDTO updateNot(@PathVariable Long id, @RequestBody NotRequestDTO notDTO) {
+        return notService.update(id, notDTO)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Güncellenecek not bulunamadı: " + id));
     }
 
     @PreAuthorize("hasAnyRole('Idareci','Akademisyen')")
