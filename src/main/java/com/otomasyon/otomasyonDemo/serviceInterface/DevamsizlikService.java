@@ -1,18 +1,18 @@
 package com.otomasyon.otomasyonDemo.serviceInterface;
 
-import com.otomasyon.otomasyonDemo.entity.Devamsizlik;
+import com.otomasyon.otomasyonDemo.requestDTO.DevamsizlikRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.DevamsizlikResponseDTO;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface DevamsizlikService {
-    List<Devamsizlik> findAll();
+    List<DevamsizlikResponseDTO> findAll();
 
-    Optional<Devamsizlik> findById(Long id);
+    DevamsizlikResponseDTO findById(Long id);
 
-    Devamsizlik save(Devamsizlik theDevamsizlik);
+    DevamsizlikResponseDTO save(DevamsizlikRequestDTO devamsizlikDTO);
 
-    Devamsizlik update(Long id, Devamsizlik theDevamsizlik);
+    DevamsizlikResponseDTO update(Long id, DevamsizlikResponseDTO devamsizlikDTO);
 
     void deleteById(Long id);
 }

@@ -6,9 +6,9 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProgramResponseDTO {
+public class DegerlendirmeResponseDTO {
     private Long id;
-    private String programTuru;
-    private String bolumlerId;
-    private String ogrenciProgramlariId;
+    private int ortalama;
+    private Long ogrenciId;
+    private Long akademisyenId;
 }

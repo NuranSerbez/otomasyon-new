@@ -1,14 +1,13 @@
 package com.otomasyon.otomasyonDemo.responseDTO;
-
 import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProgramResponseDTO {
+public class CevapResponseDTO {
     private Long id;
-    private String programTuru;
-    private String bolumlerId;
-    private String ogrenciProgramlariId;
+    private Long degerlendirmeId;
+    private Long soruId;
+    private int puan;
 }

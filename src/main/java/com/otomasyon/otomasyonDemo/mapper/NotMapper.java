@@ -4,19 +4,21 @@ import com.otomasyon.otomasyonDemo.entity.DersAtama;
 import com.otomasyon.otomasyonDemo.entity.Not;
 import com.otomasyon.otomasyonDemo.requestDTO.NotRequestDTO;
 import com.otomasyon.otomasyonDemo.responseDTO.NotResponseDTO;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface NotMapper {
 
-    @Mapping(target = "dersAtamaId", source = "dersAtama.id")
+    @Mapping(source = "dersAtama.id", target = "dersAtamaId")
     NotResponseDTO toDTO(Not not);
 
-    @Mapping(target = "dersAtama", expression = "java(mapToDersAtama(dto.getDersAtamaId()))")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(source = "dersAtama", target = "dersAtama")
     Not toEntity(NotRequestDTO dto);
 
-    default DersAtama mapToDersAtama(Long dersAtamaId) {
-        if (dersAtamaId == null) return null;
+    default DersAtama mapDersAtama(Long dersAtamaId){
+        if (dersAtamaId==null)return null;
         DersAtama dersAtama = new DersAtama();
         dersAtama.setId(dersAtamaId);
         return dersAtama;

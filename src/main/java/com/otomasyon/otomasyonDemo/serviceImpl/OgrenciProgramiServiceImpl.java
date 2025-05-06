@@ -1,6 +1,8 @@
 package com.otomasyon.otomasyonDemo.serviceImpl;
 
 import com.otomasyon.otomasyonDemo.entity.OgrenciProgrami;
+import com.otomasyon.otomasyonDemo.entity.Program;
+import com.otomasyon.otomasyonDemo.exception.NotFoundException;
 import com.otomasyon.otomasyonDemo.mapper.OgrenciProgramiMapper;
 import com.otomasyon.otomasyonDemo.repository.OgrenciProgramiRepository;
 import com.otomasyon.otomasyonDemo.requestDTO.OgrenciProgramiRequestDTO;
@@ -10,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,9 +35,10 @@ public class OgrenciProgramiServiceImpl implements OgrenciProgramiService {
     }
 
     @Override
-    public Optional<OgrenciProgramiResponseDTO> findById(Long id) {
-        return ogrenciProgramiRepository.findById(id)
-                .map(ogrenciProgramiMapper::toDTO);
+    public OgrenciProgramiResponseDTO findById(Long id) {
+        OgrenciProgrami ogrenciProgrami = ogrenciProgramiRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Öğrenci programı bulunamadı: " + id));
+        return ogrenciProgramiMapper.toDTO(ogrenciProgrami);
     }
 
     @Override
@@ -47,21 +49,20 @@ public class OgrenciProgramiServiceImpl implements OgrenciProgramiService {
     }
 
     @Override
-    public Optional<OgrenciProgramiResponseDTO> update(Long id, OgrenciProgramiRequestDTO ogrenciProgramiDTO) {
-        return ogrenciProgramiRepository.findById(id)
-                .map(existing -> {
-                    OgrenciProgrami updated = ogrenciProgramiMapper.toEntity(ogrenciProgramiDTO);
-                    updated.setId(existing.getId());
-                    return ogrenciProgramiMapper.toDTO(ogrenciProgramiRepository.save(updated));
-                });
+    public OgrenciProgramiResponseDTO update(Long id, OgrenciProgramiRequestDTO ogrenciProgramiDTO) {
+        OgrenciProgrami ogrenciProgrami = ogrenciProgramiRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Güncellenecek öğrenci programı bulunamadı: " + id));
+
+        OgrenciProgrami updated = ogrenciProgramiMapper.toEntity(ogrenciProgramiDTO);
+        updated.setId(ogrenciProgrami.getId());
+        OgrenciProgrami saved = ogrenciProgramiRepository.save(updated);
+        return ogrenciProgramiMapper.toDTO(saved);
     }
 
     @Override
-    public boolean deleteById(Long id) {
-        if (ogrenciProgramiRepository.existsById(id)) {
-            ogrenciProgramiRepository.deleteById(id);
-            return true;
-        }
-        return false;
+    public void deleteById(Long id) {
+        OgrenciProgrami ogrenciProgrami = ogrenciProgramiRepository.findById(id)
+                .orElseThrow(()-> new NotFoundException("Silinecek öğrenci programı bulunamadı : " +id));
+        ogrenciProgramiRepository.delete(ogrenciProgrami);
     }
 }

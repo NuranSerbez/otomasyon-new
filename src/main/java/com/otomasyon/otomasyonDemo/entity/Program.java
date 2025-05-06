@@ -31,6 +31,4 @@ public class Program {
     @JsonManagedReference("program-reference")
     private List<OgrenciProgrami> ogrenciProgramlari;
 
-    public class ProgramTuru {
-    }
 }

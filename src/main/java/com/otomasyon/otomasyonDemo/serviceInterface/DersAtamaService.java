@@ -1,18 +1,18 @@
 package com.otomasyon.otomasyonDemo.serviceInterface;
 
 import com.otomasyon.otomasyonDemo.entity.DersAtama;
+import com.otomasyon.otomasyonDemo.responseDTO.DersAtamaResponseDTO;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface DersAtamaService {
-    List<DersAtama> findAll();
+    List<DersAtamaResponseDTO> findAll();
 
-    Optional<DersAtama> findById(Long id);
+    DersAtamaResponseDTO findById(Long id);
 
-    DersAtama save(DersAtama theDersAtama);
+    DersAtamaResponseDTO save(DersAtama dersAtamaDTO);
 
-    DersAtama update(Long id, DersAtama theDersAtama);
+    DersAtamaResponseDTO update(Long id, DersAtama dersAtamaDTO);
 
     void deleteById(Long id);
 }

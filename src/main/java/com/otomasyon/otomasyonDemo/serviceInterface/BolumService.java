@@ -1,19 +1,18 @@
 package com.otomasyon.otomasyonDemo.serviceInterface;
 
-import com.otomasyon.otomasyonDemo.entity.Bolum;
-import com.otomasyon.otomasyonDemo.repository.BolumRepository;
+import com.otomasyon.otomasyonDemo.requestDTO.BolumRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.BolumResponseDTO;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface BolumService {
-    List<Bolum> findAll();
+    List<BolumResponseDTO> findAll();
 
-    Optional<Bolum> findById(Long id);
+    BolumResponseDTO findById(Long id);
 
-    Bolum save(Bolum theBolum);
+    BolumResponseDTO save(BolumRequestDTO bolumDTO);
 
-    Bolum update(Long id, Bolum theBolum);
+    BolumResponseDTO update(Long id, BolumRequestDTO bolumDTO);
 
-    BolumRepository deleteById(Long id);
+    void deleteById(Long id);
 }

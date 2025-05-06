@@ -1,18 +1,18 @@
 package com.otomasyon.otomasyonDemo.serviceInterface;
 
-import com.otomasyon.otomasyonDemo.entity.Cevap;
+import com.otomasyon.otomasyonDemo.requestDTO.CevapRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.CevapResponseDTO;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface CevapService {
-    List<Cevap> findAll();
+    List<CevapResponseDTO> findAll();
 
-    Optional<Cevap> findById(Long id);
+    CevapResponseDTO findById(Long id);
 
-    Cevap save(Cevap theCevap);
+    CevapResponseDTO save(CevapRequestDTO cevapDTO);
 
-    Cevap update(Long id, Cevap theCevap);
+    CevapResponseDTO update(Long id, CevapRequestDTO cevapDTO);
 
     void deleteById(Long id);
 }

@@ -6,7 +6,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OgrenciProgramiRequestDTO {
+public class DersRequestDTO {
     private String program;
-    private String user;
+    private String akademisyen;
 }

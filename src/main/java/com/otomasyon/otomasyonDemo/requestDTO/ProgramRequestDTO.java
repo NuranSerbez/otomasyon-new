@@ -8,4 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 public class ProgramRequestDTO {
     private String programTuru;
+    private String bolum;
+    private String ogrenciProgrami;
 }

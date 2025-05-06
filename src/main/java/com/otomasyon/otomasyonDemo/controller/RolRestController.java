@@ -4,8 +4,9 @@ import com.otomasyon.otomasyonDemo.entity.Rol;
 import com.otomasyon.otomasyonDemo.requestDTO.RolRequestDTO;
 import com.otomasyon.otomasyonDemo.responseDTO.RolResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.RolService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -14,51 +15,48 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/rol")
+@RequiredArgsConstructor
 public class RolRestController {
 
     private final RolService rolService;
 
-    @Autowired
-    public RolRestController(RolService rolService) {
-        this.rolService = rolService;
-    }
-
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-    @GetMapping("/all")
-    public List<RolResponseDTO> findAll() {
-        return rolService.findAll();
+    @GetMapping
+    public ResponseEntity<List<RolResponseDTO>> getAllRoles() {
+        return ResponseEntity.ok(rolService.findAll());
     }
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
-    @GetMapping("/id/{id}")
-    public RolResponseDTO getRol(@PathVariable Long id) {
-        return rolService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol bulunamadı."));
+    @GetMapping("/{id}")
+    public ResponseEntity<RolResponseDTO> getRolById(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(rolService.findById(id));
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol bulunamadı: " + id);
+        }
     }
 
     @PreAuthorize("hasRole('Idareci')")
-    @PostMapping("/add")
-    public RolResponseDTO addRol(@RequestBody RolRequestDTO rolDTO) {
-        validateRolTuru(rolDTO.getRolTuru());
-        return rolService.save(rolDTO);
+    @PostMapping
+    public ResponseEntity<RolResponseDTO> createRol(@RequestBody RolRequestDTO dto) {
+        validateRolTuru(dto.getRolTuru());
+        RolResponseDTO created = rolService.save(dto);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasRole('Idareci')")
-    @PutMapping("/update/{id}")
-    public RolResponseDTO updateRol(@PathVariable Long id, @RequestBody RolRequestDTO rolDTO) {
-        validateRolTuru(rolDTO.getRolTuru());
-        RolResponseDTO mevcutRol = rolService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Güncellenecek rol bulunamadı."));
-        return rolService.update(id, rolDTO);
+    @PutMapping("/{id}")
+    public ResponseEntity<RolResponseDTO> updateRol(@PathVariable Long id, @RequestBody RolRequestDTO dto) {
+        validateRolTuru(dto.getRolTuru());
+        RolResponseDTO updated = rolService.update(id, dto);
+        return ResponseEntity.ok(updated);
     }
 
     @PreAuthorize("hasRole('Idareci')")
-    @DeleteMapping("/delete/{id}")
-    public String deleteRol(@PathVariable Long id) {
-        rolService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol bulunamadı."));
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRol(@PathVariable Long id) {
         rolService.deleteById(id);
-        return "Rol silindi.";
+        return ResponseEntity.noContent().build();
     }
 
     private void validateRolTuru(String rolTuruStr) {

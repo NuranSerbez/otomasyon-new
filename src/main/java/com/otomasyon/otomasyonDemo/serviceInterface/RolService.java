@@ -9,9 +9,14 @@ import java.util.Optional;
 
 public interface RolService {
     List<RolResponseDTO> findAll();
-    Optional<RolResponseDTO> findById(Long id);
+
+    RolResponseDTO findById(Long id);
+
     RolResponseDTO save(RolRequestDTO rolDTO);
+
     RolResponseDTO update(Long id, RolRequestDTO rolDTO);
+
     void deleteById(Long id);
+
     Optional<Rol> findByRolTuru(Rol.RolTuru rolTuru);
 }

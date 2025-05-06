@@ -1,10 +1,12 @@
 package com.otomasyon.otomasyonDemo.controller;
 
+import com.otomasyon.otomasyonDemo.exception.NotFoundException;
 import com.otomasyon.otomasyonDemo.requestDTO.SoruRequestDTO;
 import com.otomasyon.otomasyonDemo.responseDTO.SoruResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.SoruService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -13,48 +15,52 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/soru")
+@RequiredArgsConstructor
 public class SoruRestController {
 
     private final SoruService soruService;
 
-    @Autowired
-    public SoruRestController(SoruService soruService) {
-        this.soruService = soruService;
-    }
-
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-    @GetMapping("/all")
-    public List<SoruResponseDTO> findAll() {
-        return soruService.findAll();
+    @GetMapping
+    public ResponseEntity<List<SoruResponseDTO>> getAllSorular() {
+        return ResponseEntity.ok(soruService.findAll());
     }
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/{id}")
-    public SoruResponseDTO getSoru(@PathVariable Long id) {
-        return soruService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Soru bulunamadı."));
+    public ResponseEntity<SoruResponseDTO> getSoruById(@PathVariable Long id) {
+        SoruResponseDTO soru = soruService.findById(id);
+        if (soru == null) {
+            throw new NotFoundException("Soru bulunamadı: " + id);
+        }
+        return ResponseEntity.ok(soru);
     }
 
     @PreAuthorize("hasRole('Idareci')")
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public SoruResponseDTO addSoru(@RequestBody SoruRequestDTO soruDTO) {
-        return soruService.save(soruDTO);
+    public ResponseEntity<SoruResponseDTO> createSoru(@RequestBody SoruRequestDTO soruDTO) {
+        SoruResponseDTO created = soruService.save(soruDTO);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasRole('Idareci')")
     @PutMapping("/{id}")
-    public SoruResponseDTO updateSoru(@PathVariable Long id, @RequestBody SoruRequestDTO soruDTO) {
-        return soruService.update(id, soruDTO)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Güncellenecek soru bulunamadı."));
+    public ResponseEntity<SoruResponseDTO> updateSoru(@PathVariable Long id, @RequestBody SoruRequestDTO soruDTO) {
+        SoruResponseDTO updated = soruService.update(id, soruDTO);
+        if (updated == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Güncellenecek soru bulunamadı.");
+        }
+        return ResponseEntity.ok(updated);
     }
 
     @PreAuthorize("hasRole('Idareci')")
-    @DeleteMapping("/delete/{id}")
-    public String deleteSoru(@PathVariable Long id) {
-        soruService.findById(id)
-                        .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Soru bulunamadı"));
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSoru(@PathVariable Long id) {
+        SoruResponseDTO soru = soruService.findById(id);
+        if (soru == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Soru bulunamadı.");
+        }
         soruService.deleteById(id);
-        return "Soru silindi.";
+        return ResponseEntity.noContent().build();
     }
 }

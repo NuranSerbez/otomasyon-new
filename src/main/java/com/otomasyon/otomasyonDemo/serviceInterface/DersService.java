@@ -1,18 +1,18 @@
 package com.otomasyon.otomasyonDemo.serviceInterface;
 
-import com.otomasyon.otomasyonDemo.entity.Ders;
+import com.otomasyon.otomasyonDemo.requestDTO.DersRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.DersResponseDTO;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface DersService {
-    List<Ders> findAll();
+    List<DersResponseDTO> findAll();
 
-    Optional<Ders> findById(Long id);
+    DersResponseDTO findById(Long id);
 
-    Ders save(Ders theDers);
+    DersResponseDTO save(DersRequestDTO dersDTO);
 
-    Ders update(Long id, Ders theDers);
+    DersResponseDTO update(Long id, DersRequestDTO dersDTO);
 
     void deleteById(Long id);
 }

@@ -1,18 +1,18 @@
 package com.otomasyon.otomasyonDemo.serviceInterface;
 
-import com.otomasyon.otomasyonDemo.entity.Degerlendirme;
+import com.otomasyon.otomasyonDemo.requestDTO.DegerlendirmeRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.DegerlendirmeResponseDTO;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface DegerlendirmeService {
-    List<Degerlendirme> findAll();
+    List<DegerlendirmeResponseDTO> findAll();
 
-    Optional<Degerlendirme> findById(Long id);
+    DegerlendirmeResponseDTO findById(Long id);
 
-    Degerlendirme save(Degerlendirme theDegerlendirme);
+    DegerlendirmeResponseDTO save(DegerlendirmeRequestDTO degerlendirmeDTO);
 
-    Degerlendirme update(Long id, Degerlendirme theDegerlendirme);
+    DegerlendirmeResponseDTO update(Long id, DegerlendirmeRequestDTO degerlendirmeDTO);
 
     void deleteById(Long id);
 }

@@ -5,30 +5,31 @@ import com.otomasyon.otomasyonDemo.entity.Program;
 import com.otomasyon.otomasyonDemo.entity.User;
 import com.otomasyon.otomasyonDemo.requestDTO.OgrenciProgramiRequestDTO;
 import com.otomasyon.otomasyonDemo.responseDTO.OgrenciProgramiResponseDTO;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface OgrenciProgramiMapper {
 
-        @Mapping(target = "programId", expression = "java(String.valueOf(ogrenciProgrami.getProgram().getId()))")
-        @Mapping(target = "userId", expression = "java(String.valueOf(ogrenciProgrami.getUser().getId()))")
-        OgrenciProgramiResponseDTO toDTO(OgrenciProgrami ogrenciProgrami);
+    @Mapping(source = "program.id", target = "programId")
+    @Mapping(source = "user.id", target = "userId")
+    OgrenciProgramiResponseDTO toDTO(OgrenciProgrami ogrenciProgrami);
 
-        @Mapping(target = "program", expression = "java(mapProgram(dto.getProgramId()))")
-        @Mapping(target = "user", expression = "java(mapUser(dto.getUserId()))")
-        OgrenciProgrami toEntity(OgrenciProgramiRequestDTO dto);
+    @Mapping(source = "program", target = "program")
+    @Mapping(source = "user", target = "user")
+    OgrenciProgrami toEntity(OgrenciProgramiRequestDTO dto);
 
-        default Program mapProgram(String programId) {
-                if (programId == null) return null;
-                Program program = new Program();
-                program.setId(Long.parseLong(programId));
-                return program;
-        }
+    default Program mapProgram(Long programId) {
+        if (programId == null) return null;
+        Program program = new Program();
+        program.setId(programId);
+        return program;
+    }
 
-        default User mapUser(String userId) {
-                if (userId == null) return null;
-                User user = new User();
-                user.setId(Long.parseLong(userId));
-                return user;
-        }
+    default User mapUser(Long userId) {
+        if (userId == null) return null;
+        User user = new User();
+        user.setId(userId);
+        return user;
+    }
 }

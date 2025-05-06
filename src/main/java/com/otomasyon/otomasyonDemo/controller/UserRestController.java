@@ -5,7 +5,9 @@ import com.otomasyon.otomasyonDemo.requestDTO.UserRequestDTO;
 import com.otomasyon.otomasyonDemo.responseDTO.UserResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.RolService;
 import com.otomasyon.otomasyonDemo.serviceInterface.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -14,53 +16,48 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/user")
+@RequiredArgsConstructor
 public class UserRestController {
 
     private final UserService userService;
     private final RolService rolService;
 
-    public UserRestController(UserService userService, RolService rolService) {
-        this.userService = userService;
-        this.rolService = rolService;
+    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
+    @GetMapping
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
+        return ResponseEntity.ok(userService.findAll());
     }
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-    @GetMapping("/all")
-    public List<UserResponseDTO> findAll() {
-        return userService.findAll();
-    }
-
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-    @GetMapping("/id/{id}")
-    public UserResponseDTO getUser(@PathVariable Long id) {
-        return userService.findById(id);
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.findById(id));
     }
 
     @PreAuthorize("hasRole('Idareci')")
-    @PostMapping("/add")
-    public UserResponseDTO addUser(@RequestBody UserRequestDTO userDTO) {
+    @PostMapping
+    public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserRequestDTO userDTO) {
         validateRol(userDTO.getRol());
-        return userService.save(userDTO);
+        return ResponseEntity.ok(userService.save(userDTO));
     }
 
     @PreAuthorize("hasRole('Idareci')")
-    @PutMapping("/update/{id}")
-    public UserResponseDTO updateUser(@PathVariable Long id, @RequestBody UserRequestDTO userDTO) {
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @RequestBody UserRequestDTO userDTO) {
         validateRol(userDTO.getRol());
-        return userService.update(id, userDTO);
+        return ResponseEntity.ok(userService.update(id, userDTO));
     }
 
     @PreAuthorize("hasRole('Idareci')")
-    @DeleteMapping("/delete/{id}")
-    public String deleteUser(@PathVariable Long id) {
-        userService.findById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteById(id);
-        return "Kullanıcı silindi.";
+        return ResponseEntity.noContent().build();
     }
 
     private void validateRol(String rolStr) {
         try {
-            Rol.RolTuru rolTuru = Rol.RolTuru.valueOf(rolStr);
+            Rol.RolTuru rolTuru = Rol.RolTuru.valueOf(rolStr.toUpperCase());
             rolService.findByRolTuru(rolTuru)
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Rol bulunamadı."));
         } catch (IllegalArgumentException e) {

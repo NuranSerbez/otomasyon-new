@@ -11,5 +11,5 @@ public class NotResponseDTO {
     private int vize;
     private int finl;
     private int ortalama;
-    private Long dersAtama;
+    private Long dersAtamaId;
 }

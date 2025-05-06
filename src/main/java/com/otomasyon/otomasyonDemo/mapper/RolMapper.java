@@ -8,10 +8,17 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface RolMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "rolTuru", expression = "java(Rol.RolTuru.valueOf(dto.getRolTuru().toUpperCase()))")
+    @Mapping(source = "rolTuru", target = "rolTuru")
     Rol toEntity(RolRequestDTO dto);
 
     @Mapping(source = "rolTuru", target = "rolTuru")
     RolResponseDTO toDTO(Rol rol);
+
+    default Rol.RolTuru stringToRolTuru(String rolTuruStr) {
+        return rolTuruStr == null ? null : Rol.RolTuru.valueOf(rolTuruStr.toUpperCase());
+    }
+
+    default String rolTuruToString(Rol.RolTuru rolTuru) {
+        return rolTuru == null ? null : rolTuru.name();
+    }
 }

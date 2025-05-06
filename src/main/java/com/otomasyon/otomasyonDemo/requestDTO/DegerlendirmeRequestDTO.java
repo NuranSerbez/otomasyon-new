@@ -1,12 +1,11 @@
 package com.otomasyon.otomasyonDemo.requestDTO;
-
 import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class OgrenciProgramiRequestDTO {
-    private String program;
-    private String user;
+public class DegerlendirmeRequestDTO {
+    private String ogrenci;
+    private String akademisyen;
 }

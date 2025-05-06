@@ -26,4 +26,5 @@ public class OgrenciProgrami {
     @JoinColumn(name = "program_id")
     @JsonBackReference("program-reference")
     private Program program;
+
 }

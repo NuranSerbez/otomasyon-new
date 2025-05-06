@@ -1,6 +1,8 @@
 package com.otomasyon.otomasyonDemo.serviceImpl;
 
+import com.otomasyon.otomasyonDemo.entity.DersAtama;
 import com.otomasyon.otomasyonDemo.entity.Not;
+import com.otomasyon.otomasyonDemo.exception.NotFoundException;
 import com.otomasyon.otomasyonDemo.mapper.NotMapper;
 import com.otomasyon.otomasyonDemo.repository.DersAtamaRepository;
 import com.otomasyon.otomasyonDemo.repository.NotRepository;
@@ -11,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +30,7 @@ public class NotServiceImpl implements NotService {
         this.dersAtamaRepository = dersAtamaRepository;
         this.notMapper = notMapper;
     }
+
     @Override
     public List<NotResponseDTO> findAll() {
         return notRepository.findAll()
@@ -36,32 +38,36 @@ public class NotServiceImpl implements NotService {
                 .map(notMapper::toDTO)
                 .collect(Collectors.toList());
     }
+
     @Override
-    public Optional<NotResponseDTO> findById(Long id) {
-        return notRepository.findById(id)
-                .map(notMapper::toDTO);
+    public NotResponseDTO findById(Long id) {
+        Not not = notRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Not bulunamadı :" + id));
+        return notMapper.toDTO(not);
     }
+
     @Override
-    public NotResponseDTO save(NotRequestDTO notDTO) {
-        Not notEntity = notMapper.toEntity(notDTO);
-        Not saved = notRepository.save(notEntity);
-        return notMapper.toDTO(saved);
+    public NotResponseDTO save(NotRequestDTO dto) {
+        Not not = notMapper.toEntity(dto);
+        return notMapper.toDTO(notRepository.save(not));
     }
+
     @Override
-    public Optional<NotResponseDTO> update(Long id, NotRequestDTO notDTO) {
-        return notRepository.findById(id)
-                .map(existing -> {
-                    Not updated = notMapper.toEntity(notDTO);
-                    updated.setId(id);
-                    return notMapper.toDTO(notRepository.save(updated));
-                });
+    public NotResponseDTO update(Long id, NotRequestDTO notDTO) {
+        Not not = notRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Not bulunamadı: " + id));
+
+        DersAtama dersAtama = notMapper.mapToDersAtama(notDTO.getDersAtama());
+        not.setDersAtama(dersAtama);
+
+        Not updatedNot = notRepository.save(not);
+        return notMapper.toDTO(updatedNot);
     }
+
     @Override
-    public boolean deleteById(Long id) {
-        if (notRepository.existsById(id)) {
-            notRepository.deleteById(id);
-            return true;
-        }
-        return false;
+    public void deleteById(Long id) {
+        Not not = notRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Not bulunamadı: " + id));
+        notRepository.delete(not);
     }
 }

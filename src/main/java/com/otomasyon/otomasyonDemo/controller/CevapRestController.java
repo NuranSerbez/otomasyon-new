@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otomasyon.otomasyonDemo.entity.Cevap;
 import com.otomasyon.otomasyonDemo.entity.Degerlendirme;
 import com.otomasyon.otomasyonDemo.entity.Soru;
+import com.otomasyon.otomasyonDemo.responseDTO.SoruResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.CevapService;
 import com.otomasyon.otomasyonDemo.serviceInterface.DegerlendirmeService;
 import com.otomasyon.otomasyonDemo.serviceInterface.SoruService;
@@ -48,7 +49,7 @@ public class CevapRestController {
     @PostMapping("/add")
     public Cevap addCevap(@RequestBody Cevap theCevap) {
         theCevap.setId(null);
-        Optional<Soru> soru = soruService.findById(theCevap.getSoru().getId());
+        Optional<SoruResponseDTO> soru = soruService.findById(theCevap.getSoru().getId());
         if (soru.isEmpty()) {
             return null;
         }
@@ -62,20 +63,15 @@ public class CevapRestController {
     @PreAuthorize("hasAnyRole('Ogrenci', 'Idareci')")
     @PutMapping("/update/{id}")
     public Cevap updateCevap(@PathVariable Long id, @RequestBody Cevap theCevap) {
-        var soru = soruService.findById(theCevap.getSoru().getId());
-        if (soru.isEmpty()) {
-            return null;
-        }
-        theCevap.setSoru(soru.get());
-
-        var degerlendirmeOpt = degerlendirmeService.findById(theCevap.getDegerlendirme().getId());
-        if (degerlendirmeOpt.isEmpty()) {
-            return null;
-        }
-        theCevap.setDegerlendirme(degerlendirmeOpt.get());
-
-        return cevapService.update(id, theCevap);
+        Optional<SoruResponseDTO> soruOptional = soruService.findById(theCevap.getSoru().getId());
+        return soruOptional.map(s -> {
+            Soru soru = new Soru();
+            soru.setId(s.getId());
+            theCevap.setSoru(soru);
+            return cevapService.save(theCevap);
+        }).orElse(null);
     }
+
 
     @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/delete/{id}")

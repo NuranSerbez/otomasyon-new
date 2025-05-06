@@ -1,15 +1,15 @@
 package com.otomasyon.otomasyonDemo.serviceInterface;
 
-import com.otomasyon.otomasyonDemo.entity.Fakulte;
+import com.otomasyon.otomasyonDemo.requestDTO.FakulteRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.FakulteResponseDTO;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface FakulteService {
-    List<Fakulte> findAll();
-    Optional<Fakulte> findById(Long id);
-    Fakulte save(Fakulte theFakulte);
-    Fakulte update(Long id, Fakulte theFakulte);
+    List<FakulteResponseDTO> findAll();
+    FakulteResponseDTO findById(Long id);
+    FakulteResponseDTO save(FakulteRequestDTO fakulteDTO);
+    FakulteResponseDTO update(Long id, FakulteRequestDTO fakulteDTO);
     void deleteById(Long id);
 }
 

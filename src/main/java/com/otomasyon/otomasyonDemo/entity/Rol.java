@@ -18,7 +18,6 @@ public class Rol {
     @Column(name = "rol_turu")
     private RolTuru rolTuru;
 
-
     public enum RolTuru {
         IDARECI,
         AKADEMISYEN,

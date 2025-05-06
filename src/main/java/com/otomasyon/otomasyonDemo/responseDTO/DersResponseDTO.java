@@ -6,9 +6,10 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProgramResponseDTO {
+public class DersResponseDTO {
     private Long id;
-    private String programTuru;
-    private String bolumlerId;
-    private String ogrenciProgramlariId;
+    private String dersAdi;
+    private int kontenjan;
+    private Long programId;
+    private Long akademisyenId;
 }
