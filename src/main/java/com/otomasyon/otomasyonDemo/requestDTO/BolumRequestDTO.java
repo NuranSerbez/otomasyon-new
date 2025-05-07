@@ -6,6 +6,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BolumRequestDTO {
+    private String bolumAdi;
     private String fakulte;
     private String program;
+
 }

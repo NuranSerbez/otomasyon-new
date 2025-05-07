@@ -9,6 +9,6 @@ import lombok.*;
 public class DersAtamaResponseDTO {
     private Long id;
     private Long dersId;
-    private Long ogrenciId;
+    private Long userId;
     private boolean onaydurum;
 }

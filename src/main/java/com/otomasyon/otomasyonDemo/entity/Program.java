@@ -25,10 +25,10 @@ public class Program {
 
     @OneToMany(mappedBy = "program")
     @JsonManagedReference("program-reference")
-    private Set<Bolum> bolumler = new HashSet<>();
+    private List<Bolum> bolumlerId;
 
     @OneToMany(mappedBy = "program")
     @JsonManagedReference("program-reference")
-    private List<OgrenciProgrami> ogrenciProgramlari;
+    private List<OgrenciProgrami> ogrenciProgramlariId;
 
 }

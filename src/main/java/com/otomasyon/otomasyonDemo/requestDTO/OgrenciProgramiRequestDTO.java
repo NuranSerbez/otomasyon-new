@@ -7,6 +7,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OgrenciProgramiRequestDTO {
-    private String program;
-    private String user;
+    private String programId;
+    private String userId;
 }

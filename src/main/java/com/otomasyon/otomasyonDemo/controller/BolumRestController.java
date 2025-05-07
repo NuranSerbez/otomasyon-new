@@ -1,81 +1,82 @@
 package com.otomasyon.otomasyonDemo.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.otomasyon.otomasyonDemo.entity.Bolum;
-import com.otomasyon.otomasyonDemo.entity.Fakulte;
+import com.otomasyon.otomasyonDemo.requestDTO.BolumRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.BolumResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.BolumService;
 import com.otomasyon.otomasyonDemo.serviceInterface.FakulteService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/bolum")
+@RequiredArgsConstructor
 public class BolumRestController {
 
     private final BolumService bolumService;
     private final FakulteService fakulteService;
-    private final ObjectMapper objectMapper;
-
-    @Autowired
-    public BolumRestController(BolumService bolumService, FakulteService fakulteService, ObjectMapper objectMapper) {
-        this.bolumService = bolumService;
-        this.fakulteService = fakulteService;
-        this.objectMapper = objectMapper;
-    }
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/all")
-    public List<Bolum> findAll() {
-        return bolumService.findAll();
+    public ResponseEntity<List<BolumResponseDTO>> findAll() {
+        List<BolumResponseDTO> bolumList = bolumService.findAll();
+        return ResponseEntity.ok(bolumList);
     }
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/id/{id}")
-    public Optional<Bolum> getBolum(@PathVariable Long id) {
-        return bolumService.findById(id);
+    public ResponseEntity<BolumResponseDTO> getById(@PathVariable Long id) {
+        BolumResponseDTO bolum = bolumService.findById(id);
+        if (bolum == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bölüm bulunamadı: " + id);
+        }
+        return ResponseEntity.ok(bolum);
     }
 
     @PreAuthorize("hasRole('Idareci')")
     @PostMapping("/add")
-    public Bolum addBolum(@RequestBody Bolum theBolum) {
-        theBolum.setId(null);
-
-        if (theBolum.getFakulte() == null || theBolum.getFakulte().getId() == null) {
+    public ResponseEntity<BolumResponseDTO> add(@RequestBody BolumRequestDTO dto) {
+        if (dto.getFakulte() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fakülte bilgisi eksik.");
         }
 
-        Optional<Fakulte> fakulteOpt = fakulteService.findById(theBolum.getFakulte().getId());
-        if (fakulteOpt.isEmpty()) {
+        if (fakulteService.findById(Long.valueOf(dto.getFakulte())) == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Fakülte bulunamadı.");
         }
 
-        theBolum.setFakulte(fakulteOpt.get());
-
-        return bolumService.save(theBolum);
+        BolumResponseDTO createdBolum = bolumService.save(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdBolum);
     }
 
     @PreAuthorize("hasRole('Idareci')")
     @PutMapping("/update/{id}")
-    public Bolum updateBolum(@PathVariable Long id, @RequestBody Bolum theBolum) {
-            Optional<Fakulte> fakulte = fakulteService.findById(theBolum.getFakulte().getId());
-            if (fakulte.isEmpty()) {
-                return null;
-            }
-            theBolum.setFakulte(fakulte.get());
-            return bolumService.update(id, theBolum);
-
+    public ResponseEntity<BolumResponseDTO> update(@PathVariable Long id, @RequestBody BolumRequestDTO dto) {
+        if (dto.getFakulte() == null || fakulteService.findById(Long.valueOf(dto.getFakulte())) == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Fakülte bulunamadı.");
         }
+
+        BolumResponseDTO updatedBolum = bolumService.update(id, dto);
+        if (updatedBolum == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Güncellenecek bölüm bulunamadı: " + id);
+        }
+
+        return ResponseEntity.ok(updatedBolum);
+    }
 
     @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/delete/{id}")
-    public String deleteBolum(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        BolumResponseDTO existing = bolumService.findById(id);
+        if (existing == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Silinecek bölüm bulunamadı: " + id);
+        }
+
         bolumService.deleteById(id);
-        return "Bölüm silindi - " + id;
+        return ResponseEntity.noContent().build();
     }
 }

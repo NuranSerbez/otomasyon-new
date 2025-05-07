@@ -1,51 +1,75 @@
 package com.otomasyon.otomasyonDemo.serviceImpl;
 
 import com.otomasyon.otomasyonDemo.entity.Bolum;
+import com.otomasyon.otomasyonDemo.entity.Fakulte;
+import com.otomasyon.otomasyonDemo.entity.Program;
+import com.otomasyon.otomasyonDemo.exception.NotFoundException;
+import com.otomasyon.otomasyonDemo.mapper.BolumMapper;
 import com.otomasyon.otomasyonDemo.repository.BolumRepository;
+import com.otomasyon.otomasyonDemo.repository.FakulteRepository;
+import com.otomasyon.otomasyonDemo.repository.ProgramRepository;
+import com.otomasyon.otomasyonDemo.requestDTO.BolumRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.BolumResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.BolumService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BolumServiceImpl implements BolumService {
 
     private final BolumRepository bolumRepository;
+    private final BolumMapper bolumMapper;
+    private final FakulteRepository fakulteRepository;
+    private final ProgramRepository programRepository;
 
     @Autowired
-    public BolumServiceImpl(BolumRepository bolumRepository) {
+    public BolumServiceImpl(BolumRepository bolumRepository, BolumMapper bolumMapper, FakulteRepository fakulteRepository, ProgramRepository programRepository) {
         this.bolumRepository = bolumRepository;
+        this.bolumMapper = bolumMapper;
+        this.fakulteRepository = fakulteRepository;
+        this.programRepository = programRepository;
     }
 
     @Override
-    public List<Bolum> findAll() {
-        return bolumRepository.findAll();
+    public List<BolumResponseDTO> findAll() {
+        return bolumRepository.findAll()
+                .stream()
+                .map(bolumMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<Bolum> findById(Long id) {
-        return bolumRepository.findById(id);
+    public BolumResponseDTO findById(Long id) {
+        Bolum bolum = bolumRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Bölüm bulunamadı: " + id));
+        return bolumMapper.toDTO(bolum);
     }
 
     @Override
-    public Bolum save(Bolum theBolum) {
-        return bolumRepository.save(theBolum);
+    public BolumResponseDTO save(BolumRequestDTO bolumDTO) {
+        Bolum bolum = bolumMapper.toEntity(bolumDTO);
+        return bolumMapper.toDTO(bolumRepository.save(bolum));
     }
 
     @Override
-    public Bolum update(Long id, Bolum theBolum) {
-        return bolumRepository.save(theBolum);
+    public BolumResponseDTO update(Long id, BolumRequestDTO bolumDTO) {
+        Bolum bolum = bolumRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Bölüm bulunamadı: " + id));
+        Program program = bolumMapper.mapProgram(Long.valueOf(bolumDTO.getProgram()));
+        bolum.setProgram(program);
+        Fakulte fakulte = bolumMapper.mapFakulte(Long.valueOf(bolumDTO.getFakulte()));
+        bolum.setFakulte(fakulte);
+        Bolum updatedBolum = bolumRepository.save(bolum);
+        return bolumMapper.toDTO(updatedBolum);
     }
 
-
     @Override
-    public BolumRepository deleteById(Long id) {
-        if (bolumRepository.existsById(id)) {
-            bolumRepository.deleteById(id);
-            return bolumRepository;
-        }
-        return bolumRepository;
+    public void deleteById(Long id) {
+        Bolum bolum = bolumRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Bölüm bulunamadı: " + id));
+        bolumRepository.delete(bolum);
     }
 }

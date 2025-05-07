@@ -4,8 +4,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,7 +21,7 @@ public class Fakulte {
     @Column(name = "fakulte_adi")
     private String fakulteAdi;
 
-    @OneToMany(mappedBy = "fakulte")
+    @OneToMany(mappedBy = "fakulte", fetch = FetchType.LAZY)
     @JsonManagedReference("fakulte-reference")
-    private Set<Bolum> bolumler = new HashSet<>();
+    private  List<Bolum> bolumlerId;
 }

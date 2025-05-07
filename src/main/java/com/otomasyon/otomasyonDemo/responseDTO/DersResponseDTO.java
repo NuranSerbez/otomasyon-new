@@ -11,5 +11,5 @@ public class DersResponseDTO {
     private String dersAdi;
     private int kontenjan;
     private Long programId;
-    private Long akademisyenId;
+    private Long userId;
 }

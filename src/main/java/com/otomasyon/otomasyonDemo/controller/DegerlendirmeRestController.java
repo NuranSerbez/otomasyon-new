@@ -1,76 +1,76 @@
 package com.otomasyon.otomasyonDemo.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.otomasyon.otomasyonDemo.entity.Degerlendirme;
-import com.otomasyon.otomasyonDemo.entity.User;
-import com.otomasyon.otomasyonDemo.responseDTO.UserResponseDTO;
+import com.otomasyon.otomasyonDemo.requestDTO.DegerlendirmeRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.DegerlendirmeResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.DegerlendirmeService;
-import com.otomasyon.otomasyonDemo.serviceInterface.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/degerlendirme")
+@RequiredArgsConstructor
 public class DegerlendirmeRestController {
 
     private final DegerlendirmeService degerlendirmeService;
-    private final UserService userService;
-    private final ObjectMapper objectMapper;
 
-    @Autowired
-    public DegerlendirmeRestController(DegerlendirmeService degerlendirmeService, UserService userService, ObjectMapper objectMapper) {
-        this.degerlendirmeService = degerlendirmeService;
-        this.userService = userService;
-        this.objectMapper = objectMapper;
-    }
-
-    @PreAuthorize("hasRole('Idareci')")
+    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/all")
-    public List<Degerlendirme> findAll() {
-        return degerlendirmeService.findAll();
+    public ResponseEntity<List<DegerlendirmeResponseDTO>> findAll() {
+        List<DegerlendirmeResponseDTO> degerlendirmeList = degerlendirmeService.findAll();
+        return ResponseEntity.ok(degerlendirmeList);
     }
 
-    @PreAuthorize("hasRole('Idareci')")
+    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/id/{id}")
-    public Degerlendirme getDegerlendirme(@PathVariable Long id) {
-        return degerlendirmeService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Değerlendirme bulunamadı - " + id));
+    public ResponseEntity<DegerlendirmeResponseDTO> getById(@PathVariable Long id) {
+        DegerlendirmeResponseDTO degerlendirme = degerlendirmeService.findById(id);
+        if (degerlendirme == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Değerlendirme bulunamadı: " + id);
+        }
+        return ResponseEntity.ok(degerlendirme);
     }
 
-    @PreAuthorize("hasRole('Idareci')")
+    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PostMapping("/add")
-    public Degerlendirme addDegerlendirme(@RequestBody Degerlendirme theDegerlendirme) {
-        theDegerlendirme.setId(null);
-        Long akademisyenId = theDegerlendirme.getAkademisyen().getId();
-        Long ogrenciId = theDegerlendirme.getOgrenci().getId();
-        UserResponseDTO akademisyenOptional = userService.findById(akademisyenId);
-        if (akademisyenOptional == null) {
-            throw new RuntimeException("Akademisyen bulunamadı - " + akademisyenId);
+    public ResponseEntity<DegerlendirmeResponseDTO> add(@RequestBody DegerlendirmeRequestDTO dto) {
+        if (dto.getOgrenciId() == null || dto.getAkademisyenId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Öğrenci veya akademisyen bilgisi eksik.");
         }
-        User akademisyen = new User();
-        akademisyen.setId(akademisyenOptional.getId());
-        theDegerlendirme.setAkademisyen(akademisyen);
-        UserResponseDTO ogrenciOptional = userService.findById(ogrenciId);
-        if (ogrenciOptional == null) {
-            throw new RuntimeException("Öğrenci bulunamadı - " + ogrenciId);
-        }
-        User ogrenci = new User();
-        ogrenci.setId(ogrenciOptional.getId());
-        theDegerlendirme.setOgrenci(ogrenci);
 
-        return degerlendirmeService.save(theDegerlendirme);
+        DegerlendirmeResponseDTO created = degerlendirmeService.save(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
+    @PutMapping("/update/{id}")
+    public ResponseEntity<DegerlendirmeResponseDTO> update(@PathVariable Long id, @RequestBody DegerlendirmeRequestDTO dto) {
+        if (dto.getOgrenciId() == null || dto.getAkademisyenId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Öğrenci veya akademisyen bilgisi eksik.");
+        }
+
+        DegerlendirmeResponseDTO updated = degerlendirmeService.update(id, dto);
+        if (updated == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Güncellenecek değerlendirme bulunamadı: " + id);
+        }
+
+        return ResponseEntity.ok(updated);
     }
 
     @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/delete/{id}")
-    public String deleteDegerlendirme(@PathVariable Long id) {
-        degerlendirmeService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Değerlendirme bulunamadı - " + id));
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        DegerlendirmeResponseDTO existing = degerlendirmeService.findById(id);
+        if (existing == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Silinecek değerlendirme bulunamadı: " + id);
+        }
+
         degerlendirmeService.deleteById(id);
-        return "Değerlendirme silindi - " + id;
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,6 +1,10 @@
 package com.otomasyon.otomasyonDemo.requestDTO;
 
+import com.otomasyon.otomasyonDemo.entity.Bolum;
+import com.otomasyon.otomasyonDemo.entity.OgrenciProgrami;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -8,6 +12,6 @@ import lombok.*;
 @AllArgsConstructor
 public class ProgramRequestDTO {
     private String programTuru;
-    private String bolum;
-    private String ogrenciProgrami;
+    private List<Bolum> bolumlerId;
+    private List<OgrenciProgrami> ogrenciProgramlariId;
 }

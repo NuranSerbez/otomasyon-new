@@ -1,81 +1,76 @@
 package com.otomasyon.otomasyonDemo.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.otomasyon.otomasyonDemo.entity.Ders;
+import com.otomasyon.otomasyonDemo.requestDTO.DersRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.DersResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.DersService;
-import com.otomasyon.otomasyonDemo.serviceInterface.ProgramService;
-import com.otomasyon.otomasyonDemo.serviceInterface.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/ders")
+@RequiredArgsConstructor
 public class DersRestController {
-    private DersService dersService;
-    private UserService userService;
-    private ProgramService programService;
-    private ObjectMapper objectMapper;
 
-    @Autowired
-    public DersRestController(DersService dersService, UserService userService, ProgramService programService, ObjectMapper objectMapper) {
-        this.dersService = dersService;
-        this.userService = userService;
-        this.programService = programService;
-        this.objectMapper = objectMapper;
-    }
-
+    private final DersService dersService;
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-
     @GetMapping("/all")
-    public List<Ders> findAll() {
-        return dersService.findAll();
+    public ResponseEntity<List<DersResponseDTO>> findAll() {
+        List<DersResponseDTO> dersList = dersService.findAll();
+        return ResponseEntity.ok(dersList);
     }
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-
     @GetMapping("/id/{id}")
-    public Ders getDers(@PathVariable Long id) {
-        return dersService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ders bulunamadı - " + id));
+    public ResponseEntity<DersResponseDTO> getById(@PathVariable Long id) {
+        DersResponseDTO ders = dersService.findById(id);
+        if (ders == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Ders bulunamadı: " + id);
+        }
+        return ResponseEntity.ok(ders);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci','Akademisyen')")
+    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PostMapping("/add")
-    public Ders addDers(@RequestBody Ders theDers) {
-        theDers.setId(null);
-        Ders dbDers = dersService.save(theDers);
-        return dbDers;
+    public ResponseEntity<DersResponseDTO> add(@RequestBody DersRequestDTO dto) {
+        if (dto.getProgramId() == null || dto.getUserId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Program veya kullanıcı bilgisi eksik.");
+        }
+
+        DersResponseDTO created = dersService.save(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci','Akademisyen')")
+    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PutMapping("/update/{id}")
-    public Ders updateDers(@RequestBody Ders theDers) {
-        Long dersId = theDers.getId();
-        var ders = dersService.findById(dersId)
-                .orElseThrow(() -> new RuntimeException("Ders bulunamadı: " + dersId));
-        Long akademisyenId = theDers.getAkademisyen().getId();
-        var akademisyen = userService.findById(akademisyenId)
-                .orElseThrow(() -> new RuntimeException("Akademisyen bulunamadı: " + akademisyenId));
-        Long programId = theDers.getProgram().getId();
-        var program = programService.findById(programId)
-                .orElseThrow(() -> new RuntimeException("Program bulunamadı: " + programId));
-        ders.setDersAdi(theDers.getDersAdi());
-        ders.setKontenjan(theDers.getKontenjan());
-        ders.setAkademisyen(akademisyen);
-        ders.setProgram(program);
-        return dersService.save(ders);
+    public ResponseEntity<DersResponseDTO> update(@PathVariable Long id, @RequestBody DersRequestDTO dto) {
+        if (dto.getProgramId() == null || dto.getUserId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Program veya kullanıcı bilgisi eksik.");
+        }
+
+        DersResponseDTO updated = dersService.update(id, dto);
+        if (updated == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Güncellenecek ders bulunamadı: " + id);
+        }
+
+        return ResponseEntity.ok(updated);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci','Akademisyen')")
+    @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/delete/{id}")
-    public String deleteDers(@PathVariable Long id) {
-        dersService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Ders bulunamadı - " + id));
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        DersResponseDTO existing = dersService.findById(id);
+        if (existing == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Silinecek ders bulunamadı: " + id);
+        }
+
         dersService.deleteById(id);
-        return "Ders silindi - " + id;
+        return ResponseEntity.noContent().build();
     }
 }

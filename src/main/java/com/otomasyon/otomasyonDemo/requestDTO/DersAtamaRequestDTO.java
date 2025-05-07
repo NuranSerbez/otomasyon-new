@@ -7,6 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DersAtamaRequestDTO {
-    private String ders;
-    private String ogrenci;
+    private Long dersId;
+    private Long userId;
+    private boolean onaydurum;
 }

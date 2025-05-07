@@ -55,5 +55,4 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonManagedReference("user-references")
     private List<OgrenciProgrami> ogrenciProgramlari;
-
 }

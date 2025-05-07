@@ -6,6 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DegerlendirmeRequestDTO {
-    private String ogrenci;
-    private String akademisyen;
+    private int ortalama;
+    private Long ogrenciId;
+    private Long akademisyenId;
 }

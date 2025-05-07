@@ -1,73 +1,76 @@
 package com.otomasyon.otomasyonDemo.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.otomasyon.otomasyonDemo.entity.Devamsizlik;
-import com.otomasyon.otomasyonDemo.serviceInterface.DersAtamaService;
+import com.otomasyon.otomasyonDemo.requestDTO.DevamsizlikRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.DevamsizlikResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.DevamsizlikService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/devamsizlik")
+@RequiredArgsConstructor
 public class DevamsizlikRestController {
-    private DevamsizlikService devamsizlikService;
-    private DersAtamaService dersAtamaService;
-    private ObjectMapper objectMapper;
 
-    @Autowired
-    public DevamsizlikRestController(DevamsizlikService devamsizlikService, DersAtamaService dersAtamaService, ObjectMapper objectMapper) {
-        this.devamsizlikService = devamsizlikService;
-        this.dersAtamaService = dersAtamaService;
-        this.objectMapper = objectMapper;
-    }
-
+    private final DevamsizlikService devamsizlikService;
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-
     @GetMapping("/all")
-    public List<Devamsizlik> findAll() {
-        return devamsizlikService.findAll();
+    public ResponseEntity<List<DevamsizlikResponseDTO>> findAll() {
+        List<DevamsizlikResponseDTO> list = devamsizlikService.findAll();
+        return ResponseEntity.ok(list);
     }
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-
     @GetMapping("/id/{id}")
-    public Devamsizlik getDevamsizlik(@PathVariable Long id) {
-        return devamsizlikService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Devamsızlık bulunamadı - " + id));
+    public ResponseEntity<DevamsizlikResponseDTO> getById(@PathVariable Long id) {
+        DevamsizlikResponseDTO response = devamsizlikService.findById(id);
+        if (response == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Devamsızlık kaydı bulunamadı: " + id);
+        }
+        return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci','Akademisyen')")
+    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PostMapping("/add")
-    public Devamsizlik addDevamsizlik(@RequestBody Devamsizlik theDevamsizlik) {
-        theDevamsizlik.setId(null);
-        Devamsizlik dbDevamsizlik = devamsizlikService.save(theDevamsizlik);
-        return dbDevamsizlik;
+    public ResponseEntity<DevamsizlikResponseDTO> add(@RequestBody DevamsizlikRequestDTO dto) {
+        if (dto.getDersAtamaId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ders atama bilgisi eksik.");
+        }
+
+        DevamsizlikResponseDTO created = devamsizlikService.save(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci','Akademisyen')")
+    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PutMapping("/update/{id}")
-    public Devamsizlik updateDevamsizlik(@RequestBody Devamsizlik theDevamsizlik) {
-        Long devamsizlikId = theDevamsizlik.getId();
-        var devamsizlik = devamsizlikService.findById(devamsizlikId)
-                .orElseThrow(() -> new RuntimeException("Devamsızlık bulunamadı: " + devamsizlikId));
-        Long dersAtamaId = theDevamsizlik.getDersAtama().getId();
-        var dersAtama = dersAtamaService.findById(dersAtamaId)
-                .orElseThrow(() -> new RuntimeException("DersAtama bulunamadı: " + dersAtamaId));
-        devamsizlik.setToplamSaat(theDevamsizlik.getToplamSaat());
-        devamsizlik.setDersAtama(dersAtama);
-        return devamsizlikService.save(devamsizlik);
+    public ResponseEntity<DevamsizlikResponseDTO> update(@PathVariable Long id, @RequestBody DevamsizlikRequestDTO dto) {
+        if (dto.getDersAtamaId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ders atama bilgisi eksik.");
+        }
+
+        DevamsizlikResponseDTO updated = devamsizlikService.update(id, dto);
+        if (updated == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Güncellenecek devamsızlık kaydı bulunamadı: " + id);
+        }
+
+        return ResponseEntity.ok(updated);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci','Akademisyen')")
-    @DeleteMapping("/{id}")
-    public String deleteDevamsizlik(@PathVariable Long id) {
-        devamsizlikService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Devamsızlık bulunamadı - " + id));
+    @PreAuthorize("hasRole('Idareci')")
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        DevamsizlikResponseDTO existing = devamsizlikService.findById(id);
+        if (existing == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Silinecek devamsızlık kaydı bulunamadı: " + id);
+        }
+
         devamsizlikService.deleteById(id);
-        return "Devamsızlık silindi - " + id;
+        return ResponseEntity.noContent().build();
     }
 }

@@ -2,10 +2,15 @@ package com.otomasyon.otomasyonDemo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.otomasyon.otomasyonDemo.entity.Fakulte;
+import com.otomasyon.otomasyonDemo.requestDTO.FakulteRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.FakulteResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.FakulteService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -25,42 +30,46 @@ public class FakulteRestController {
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
 
     @GetMapping("/all")
-    public List<Fakulte> findAll() {
-        return fakulteService.findAll();
+    public List<FakulteResponseDTO> findAll() {
+       List<FakulteResponseDTO> fakulteList = fakulteService.findAll();
+       return fakulteList;
     }
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-
     @GetMapping("/id/{id}")
-    public Fakulte getFakulte(@PathVariable Long id) {
-        return fakulteService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Fakülte bulunamadı - " + id));
+    public ResponseEntity<FakulteResponseDTO> getFakulte(@PathVariable Long id) {
+        FakulteResponseDTO fakulte = fakulteService.findById(id);
+        if (fakulte == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Fakülte bulunamadı: " + id);
+        }
+        return ResponseEntity.ok(fakulte);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci','Akademisyen')")
+    @PreAuthorize("hasRole('Idareci')")
     @PostMapping("/add")
-    public Fakulte addFakulte(@RequestBody Fakulte theFakulte) {
-        theFakulte.setId(null);
-        Fakulte dbFakulte = fakulteService.save(theFakulte);
-        return dbFakulte;
+    public ResponseEntity<FakulteResponseDTO> addFakulte(@RequestBody FakulteRequestDTO fakulteDTO) {
+        FakulteResponseDTO createdFakulte = fakulteService.save(fakulteDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdFakulte);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci','Akademisyen')")
+    @PreAuthorize("hasRole('Idareci')")
     @PutMapping("/update/{id}")
-    public Fakulte updateFakulte(@RequestBody Fakulte theFakulte) {
-        Long fakulteId = theFakulte.getId();
-        var fakulte = fakulteService.findById(fakulteId)
-                .orElseThrow(() -> new RuntimeException("Fakülte bulunamadı: " + fakulteId));
-        fakulte.setFakulteAdi(theFakulte.getFakulteAdi());
-        return fakulteService.save(fakulte);
+    public ResponseEntity<FakulteResponseDTO> updateFakulte(@PathVariable Long id, @RequestBody FakulteRequestDTO fakulteDTO) {
+        FakulteResponseDTO updatedFakulte = fakulteService.update(id, fakulteDTO);
+        if (updatedFakulte == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Güncellenecek fakülte bulunamadı: " + id);
+        }
+        return ResponseEntity.ok(updatedFakulte);
     }
 
     @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/delete/{id}")
-    public String deleteFakulte(@PathVariable Long id) {
-        fakulteService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Fakülte bulunamadı - " + id));
+    public ResponseEntity<Void> deleteFakulte(@PathVariable Long id) {
+        FakulteResponseDTO fakulte = fakulteService.findById(id);
+        if (fakulte == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Silinecek fakülte bulunamadı: " + id);
+        }
         fakulteService.deleteById(id);
-        return "Fakülte silindi - " + id;
+        return ResponseEntity.noContent().build();
     }
 }

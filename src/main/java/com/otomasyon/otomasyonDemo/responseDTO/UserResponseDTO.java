@@ -1,6 +1,8 @@
 package com.otomasyon.otomasyonDemo.responseDTO;
 import lombok.*;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,4 +17,5 @@ public class UserResponseDTO {
     private String telefon;
     private String rol;
     private boolean sifreGuncelligi;
+    private List<OgrenciProgramiResponseDTO> ogrenciProgramlari;
 }

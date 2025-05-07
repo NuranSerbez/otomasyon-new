@@ -12,7 +12,7 @@ public interface DevamsizlikService {
 
     DevamsizlikResponseDTO save(DevamsizlikRequestDTO devamsizlikDTO);
 
-    DevamsizlikResponseDTO update(Long id, DevamsizlikResponseDTO devamsizlikDTO);
+    DevamsizlikResponseDTO update(Long id, DevamsizlikRequestDTO devamsizlikDTO);
 
     void deleteById(Long id);
 }

@@ -23,11 +23,12 @@ public class Rol {
         AKADEMISYEN,
         OGRENCI
     }
-    public void setRolTuruFromString(String rolTuruStr) {
-        try {
-            this.rolTuru = RolTuru.valueOf(rolTuruStr);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Geçersiz rol türü: " + rolTuruStr);
-        }
-    }
+
+//    public void setRolTuruFromString(String rolTuruStr) {
+//        try {
+//            this.rolTuru = RolTuru.valueOf(rolTuruStr);
+//        } catch (IllegalArgumentException e) {
+//            throw new RuntimeException("Geçersiz rol türü: " + rolTuruStr);
+//        }
+//    }
 }

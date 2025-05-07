@@ -1,83 +1,76 @@
 package com.otomasyon.otomasyonDemo.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.otomasyon.otomasyonDemo.entity.Cevap;
-import com.otomasyon.otomasyonDemo.entity.Degerlendirme;
-import com.otomasyon.otomasyonDemo.entity.Soru;
-import com.otomasyon.otomasyonDemo.responseDTO.SoruResponseDTO;
+import com.otomasyon.otomasyonDemo.requestDTO.CevapRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.CevapResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.CevapService;
-import com.otomasyon.otomasyonDemo.serviceInterface.DegerlendirmeService;
-import com.otomasyon.otomasyonDemo.serviceInterface.SoruService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
-
 
 @RestController
 @RequestMapping("/api/cevap")
+@RequiredArgsConstructor
 public class CevapRestController {
-    private CevapService cevapService;
-    private DegerlendirmeService degerlendirmeService;
-    private SoruService soruService;
-    private ObjectMapper objectMapper;
 
-    @Autowired
-    public CevapRestController(CevapService cevapService, DegerlendirmeService degerlendirmeService, SoruService soruService, ObjectMapper objectMapper) {
-        this.cevapService = cevapService;
-        this.degerlendirmeService = degerlendirmeService;
-        this.soruService = soruService;
-        this.objectMapper = objectMapper;
-    }
+    private final CevapService cevapService;
 
-
-    @PreAuthorize("hasAnyRole('Akademisyen','Idareci')")
+    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/all")
-    public List<Cevap> findAll() {
-        return cevapService.findAll();
+    public ResponseEntity<List<CevapResponseDTO>> findAll() {
+        List<CevapResponseDTO> cevapList = cevapService.findAll();
+        return ResponseEntity.ok(cevapList);
     }
 
-    @PreAuthorize("hasAnyRole('Akademisyen','Idareci')")
+    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/id/{id}")
-    public List<Cevap> getCevap(@PathVariable Long id) {
-        return cevapService.findAll();
+    public ResponseEntity<CevapResponseDTO> getById(@PathVariable Long id) {
+        CevapResponseDTO cevap = cevapService.findById(id);
+        if (cevap == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cevap bulunamadı: " + id);
+        }
+        return ResponseEntity.ok(cevap);
     }
 
-    @PreAuthorize("hasAnyRole('Ogrenci', 'Idareci')")
+    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PostMapping("/add")
-    public Cevap addCevap(@RequestBody Cevap theCevap) {
-        theCevap.setId(null);
-        Optional<SoruResponseDTO> soru = soruService.findById(theCevap.getSoru().getId());
-        if (soru.isEmpty()) {
-            return null;
+    public ResponseEntity<CevapResponseDTO> add(@RequestBody CevapRequestDTO dto) {
+        if (dto.getDegerlendirme() == null || dto.getSoru() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Değerlendirme veya soru bilgisi eksik.");
         }
-        Optional<Degerlendirme> degerlendirme = degerlendirmeService.findById(theCevap.getDegerlendirme().getId());
-        if (degerlendirme.isEmpty()) {
-            return null;
-        }
-        return cevapService.save(theCevap);
+
+        CevapResponseDTO created = cevapService.save(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PreAuthorize("hasAnyRole('Ogrenci', 'Idareci')")
+    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PutMapping("/update/{id}")
-    public Cevap updateCevap(@PathVariable Long id, @RequestBody Cevap theCevap) {
-        Optional<SoruResponseDTO> soruOptional = soruService.findById(theCevap.getSoru().getId());
-        return soruOptional.map(s -> {
-            Soru soru = new Soru();
-            soru.setId(s.getId());
-            theCevap.setSoru(soru);
-            return cevapService.save(theCevap);
-        }).orElse(null);
-    }
+    public ResponseEntity<CevapResponseDTO> update(@PathVariable Long id, @RequestBody CevapRequestDTO dto) {
+        if (dto.getDegerlendirme() == null || dto.getSoru() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Değerlendirme veya soru bilgisi eksik.");
+        }
 
+        CevapResponseDTO updated = cevapService.update(id, dto);
+        if (updated == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Güncellenecek cevap bulunamadı: " + id);
+        }
+
+        return ResponseEntity.ok(updated);
+    }
 
     @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/delete/{id}")
-    public String deleteCevap(@PathVariable Long id) {
-        cevapService.deleteById(id);
-        return "Cevap silindi - " + id;
-    }
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        CevapResponseDTO existing = cevapService.findById(id);
+        if (existing == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Silinecek cevap bulunamadı: " + id);
+        }
 
+        cevapService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -7,5 +7,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotRequestDTO {
-    private String dersAtama;
+    private Long dersAtamaId;
+    private int vize;
+    private int finl;
+    private int ortalama;
+
 }

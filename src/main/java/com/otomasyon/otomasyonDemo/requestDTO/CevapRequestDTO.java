@@ -6,6 +6,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CevapRequestDTO {
+    private int puan;
     private String degerlendirme;
     private String soru;
 }

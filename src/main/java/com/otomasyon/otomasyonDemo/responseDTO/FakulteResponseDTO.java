@@ -1,6 +1,9 @@
 package com.otomasyon.otomasyonDemo.responseDTO;
 
+import com.otomasyon.otomasyonDemo.entity.Bolum;
 import lombok.*;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -9,5 +12,6 @@ import lombok.*;
 public class FakulteResponseDTO {
     private Long id;
     private String fakulteAdi;
-    private String bolumlerId;
+    private  List<Bolum> bolumlerId;
+
 }

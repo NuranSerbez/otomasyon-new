@@ -7,5 +7,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DevamsizlikRequestDTO {
-    private String dersAtama;
+    private int toplamSaat;
+    private Long dersAtamaId;
 }

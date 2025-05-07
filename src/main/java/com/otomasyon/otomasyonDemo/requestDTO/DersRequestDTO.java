@@ -7,6 +7,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DersRequestDTO {
-    private String program;
-    private String akademisyen;
+    private String dersAdi;
+    private int kontenjan;
+    private Long programId;
+    private Long userId;
 }

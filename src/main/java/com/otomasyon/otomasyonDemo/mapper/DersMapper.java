@@ -1,26 +1,25 @@
 package com.otomasyon.otomasyonDemo.mapper;
 
-import com.otomasyon.otomasyonDemo.entity.OgrenciProgrami;
+import com.otomasyon.otomasyonDemo.entity.Ders;
 import com.otomasyon.otomasyonDemo.entity.Program;
 import com.otomasyon.otomasyonDemo.entity.User;
-import com.otomasyon.otomasyonDemo.requestDTO.OgrenciProgramiRequestDTO;
-import com.otomasyon.otomasyonDemo.responseDTO.OgrenciProgramiResponseDTO;
-import org.mapstruct.*;
+import com.otomasyon.otomasyonDemo.requestDTO.DersRequestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.DersResponseDTO;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
-public interface OgrenciProgramiMapper {
-
+public interface DersMapper {
     @Mapping(source = "id", target = "id")
     @Mapping(source = "program.id", target = "programId")
-    @Mapping(source = "user.id", target = "userId")
-    OgrenciProgramiResponseDTO toDTO(OgrenciProgrami ogrenciProgrami);
+    @Mapping(source = "akademisyen.id", target = "userId")
+    DersResponseDTO toDTO(Ders ders);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(source = "programId", target = "program", qualifiedByName = "mapProgram")
-    @Mapping(source = "userId", target = "user", qualifiedByName = "mapUser")
-    OgrenciProgrami toEntity(OgrenciProgramiRequestDTO dto);
+    @Mapping(source = "programId", target = "program")
+    @Mapping(source = "userId", target = "akademisyen")
+    Ders toEntity(DersRequestDTO dto);
 
-    @Named("mapProgram")
     default Program mapProgram(Long programId) {
         if (programId == null) return null;
         Program program = new Program();
@@ -28,7 +27,6 @@ public interface OgrenciProgramiMapper {
         return program;
     }
 
-    @Named("mapUser")
     default User mapUser(Long userId) {
         if (userId == null) return null;
         User user = new User();
@@ -36,4 +34,3 @@ public interface OgrenciProgramiMapper {
         return user;
     }
 }
-

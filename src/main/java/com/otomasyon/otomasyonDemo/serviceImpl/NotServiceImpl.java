@@ -47,8 +47,8 @@ public class NotServiceImpl implements NotService {
     }
 
     @Override
-    public NotResponseDTO save(NotRequestDTO dto) {
-        Not not = notMapper.toEntity(dto);
+    public NotResponseDTO save(NotRequestDTO notDTO) {
+        Not not = notMapper.toEntity(notDTO);
         return notMapper.toDTO(notRepository.save(not));
     }
 
@@ -57,7 +57,7 @@ public class NotServiceImpl implements NotService {
         Not not = notRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Not bulunamadı: " + id));
 
-        DersAtama dersAtama = notMapper.mapToDersAtama(notDTO.getDersAtama());
+        DersAtama dersAtama = notMapper.mapDersAtama(notDTO.getDersAtamaId());
         not.setDersAtama(dersAtama);
 
         Not updatedNot = notRepository.save(not);

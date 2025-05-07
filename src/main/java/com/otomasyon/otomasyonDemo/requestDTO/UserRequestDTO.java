@@ -7,13 +7,13 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserRequestDTO {
-//    private String isim;
-//    private String soyisim;
-//    private String tckn;
-//    private String email;
-//    private String adres;
-//    private String telefon;
-//    private String password;
+    private String isim;
+    private String soyisim;
+    private String tckn;
+    private String email;
+    private String adres;
+    private String telefon;
+    private String password;
     private String rol;
-//    private boolean sifreGuncelligi;
+    private boolean sifreGuncelligi;
 }
