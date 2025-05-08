@@ -1,5 +1,8 @@
 package com.otomasyon.otomasyonDemo.controller;
 
+import com.otomasyon.otomasyonDemo.entity.Bolum;
+import com.otomasyon.otomasyonDemo.entity.Fakulte;
+import com.otomasyon.otomasyonDemo.entity.Program;
 import com.otomasyon.otomasyonDemo.requestDTO.BolumRequestDTO;
 import com.otomasyon.otomasyonDemo.responseDTO.BolumResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.BolumService;
@@ -41,12 +44,12 @@ public class BolumRestController {
     @PreAuthorize("hasRole('Idareci')")
     @PostMapping("/add")
     public ResponseEntity<BolumResponseDTO> add(@RequestBody BolumRequestDTO dto) {
-        if (dto.getFakulte() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fakülte bilgisi eksik.");
+        if (dto.getFakulte() == null || dto.getFakulte().getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Fakülte bilgisi eksik veya geçersiz.");
         }
 
-        if (fakulteService.findById(Long.valueOf(dto.getFakulte())) == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Fakülte bulunamadı.");
+        if (dto.getProgram() == null || dto.getProgram().getId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Program bilgisi eksik veya geçersiz.");
         }
 
         BolumResponseDTO createdBolum = bolumService.save(dto);
@@ -56,7 +59,7 @@ public class BolumRestController {
     @PreAuthorize("hasRole('Idareci')")
     @PutMapping("/update/{id}")
     public ResponseEntity<BolumResponseDTO> update(@PathVariable Long id, @RequestBody BolumRequestDTO dto) {
-        if (dto.getFakulte() == null || fakulteService.findById(Long.valueOf(dto.getFakulte())) == null) {
+        if (dto.getFakulte() == null || fakulteService.findById(dto.getFakulte().getId()) == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Fakülte bulunamadı.");
         }
 

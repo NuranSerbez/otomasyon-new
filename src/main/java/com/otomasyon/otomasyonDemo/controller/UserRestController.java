@@ -23,33 +23,41 @@ public class UserRestController {
     private final RolService rolService;
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.findAll());
     }
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.findById(id));
     }
 
     @PreAuthorize("hasRole('Idareci')")
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserRequestDTO userDTO) {
-        validateRol(userDTO.getRol());
-        return ResponseEntity.ok(userService.save(userDTO));
+        if (userDTO.getRolId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rol bilgisi eksik veya geçersiz.");
+        }
+        UserResponseDTO createdUser = userService.save(userDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
     @PreAuthorize("hasRole('Idareci')")
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @RequestBody UserRequestDTO userDTO) {
-        validateRol(userDTO.getRol());
-        return ResponseEntity.ok(userService.update(id, userDTO));
+        if (userDTO.getRolId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Rol bilgisi eksik veya geçersiz.");
+        }
+
+        UserResponseDTO updatedUser = userService.update(id, userDTO);
+        return ResponseEntity.ok(updatedUser);
     }
 
+
     @PreAuthorize("hasRole('Idareci')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteById(id);
         return ResponseEntity.noContent().build();

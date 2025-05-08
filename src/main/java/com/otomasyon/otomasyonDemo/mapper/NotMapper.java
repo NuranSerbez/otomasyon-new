@@ -6,7 +6,6 @@ import com.otomasyon.otomasyonDemo.requestDTO.NotRequestDTO;
 import com.otomasyon.otomasyonDemo.responseDTO.NotResponseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring")
 public interface NotMapper {

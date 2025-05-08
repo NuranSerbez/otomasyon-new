@@ -19,26 +19,26 @@ public class ProgramRestController {
     private final ProgramService programService;
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<ProgramResponseDTO>> getAllPrograms() {
         return ResponseEntity.ok(programService.findAll());
     }
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<ProgramResponseDTO> getProgramById(@PathVariable Long id) {
         return ResponseEntity.ok(programService.findById(id));
     }
 
     @PreAuthorize("hasAnyRole('Idareci','Akademisyen')")
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<ProgramResponseDTO> createProgram(@RequestBody ProgramRequestDTO programDTO) {
         ProgramResponseDTO created = programService.save(programDTO);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasAnyRole('Idareci','Akademisyen')")
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<ProgramResponseDTO> updateProgram(@PathVariable Long id,
                                                             @RequestBody ProgramRequestDTO programDTO) {
         ProgramResponseDTO updated = programService.update(id, programDTO);
@@ -46,7 +46,7 @@ public class ProgramRestController {
     }
 
     @PreAuthorize("hasRole('Idareci')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteProgram(@PathVariable Long id) {
         programService.deleteById(id);
         return ResponseEntity.noContent().build();

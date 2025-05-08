@@ -21,13 +21,13 @@ public class SoruRestController {
     private final SoruService soruService;
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<SoruResponseDTO>> getAllSorular() {
         return ResponseEntity.ok(soruService.findAll());
     }
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<SoruResponseDTO> getSoruById(@PathVariable Long id) {
         SoruResponseDTO soru = soruService.findById(id);
         if (soru == null) {
@@ -37,14 +37,14 @@ public class SoruRestController {
     }
 
     @PreAuthorize("hasRole('Idareci')")
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<SoruResponseDTO> createSoru(@RequestBody SoruRequestDTO soruDTO) {
         SoruResponseDTO created = soruService.save(soruDTO);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasRole('Idareci')")
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<SoruResponseDTO> updateSoru(@PathVariable Long id, @RequestBody SoruRequestDTO soruDTO) {
         SoruResponseDTO updated = soruService.update(id, soruDTO);
         if (updated == null) {
@@ -54,7 +54,7 @@ public class SoruRestController {
     }
 
     @PreAuthorize("hasRole('Idareci')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteSoru(@PathVariable Long id) {
         SoruResponseDTO soru = soruService.findById(id);
         if (soru == null) {

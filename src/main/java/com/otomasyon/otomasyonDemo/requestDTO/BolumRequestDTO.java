@@ -1,4 +1,6 @@
 package com.otomasyon.otomasyonDemo.requestDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.FakulteResponseDTO;
+import com.otomasyon.otomasyonDemo.responseDTO.ProgramResponseDTO;
 import lombok.*;
 
 @Getter
@@ -7,7 +9,6 @@ import lombok.*;
 @AllArgsConstructor
 public class BolumRequestDTO {
     private String bolumAdi;
-    private String fakulte;
-    private String program;
-
+    private FakulteResponseDTO fakulte;
+    private ProgramResponseDTO program;
 }

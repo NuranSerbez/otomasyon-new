@@ -15,7 +15,7 @@ public class UserResponseDTO {
     private String email;
     private String adres;
     private String telefon;
-    private String rol;
+    private Long rolId;
     private boolean sifreGuncelligi;
     private List<OgrenciProgramiResponseDTO> ogrenciProgramlari;
 }

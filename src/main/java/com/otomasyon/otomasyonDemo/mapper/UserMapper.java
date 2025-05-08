@@ -18,7 +18,7 @@ public interface UserMapper {
     @Mapping(source = "adres", target = "adres")
     @Mapping(source = "telefon", target = "telefon")
     @Mapping(source = "sifreGuncelligi", target = "sifreGuncelligi")
-    @Mapping(source = "rol.rolTuru", target = "rol")
+    @Mapping(source = "rol.id", target = "rolId")
     @Mapping(source = "ogrenciProgramlari", target = "ogrenciProgramlari")
     UserResponseDTO toDTO(User user);
 
@@ -31,16 +31,16 @@ public interface UserMapper {
     @Mapping(source = "telefon", target = "telefon")
     @Mapping(source = "password", target = "password")
     @Mapping(source = "sifreGuncelligi", target = "sifreGuncelligi")
-    @Mapping(source = "rol", target = "rol", qualifiedByName = "mapStringToRol")
+    @Mapping(source = "rolId", target = "rol.id")
     @Mapping(target = "ogrenciProgramlari", ignore = true)
     User toEntity(UserRequestDTO dto);
 
     @Named("mapStringToRol")
     default Rol mapStringToRol(String rolStr) {
         if (rolStr == null) return null;
-        Rol rol = new Rol();
-        rol.setRolTuru(Rol.RolTuru.valueOf(rolStr.toUpperCase()));
-        return rol;
+        Rol rolId = new Rol();
+        rolId.setRolTuru(Rol.RolTuru.valueOf(rolStr.toUpperCase()));
+        return rolId;
     }
 }
 

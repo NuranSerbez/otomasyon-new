@@ -21,13 +21,13 @@ public class RolRestController {
     private final RolService rolService;
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<RolResponseDTO>> getAllRoles() {
         return ResponseEntity.ok(rolService.findAll());
     }
 
     @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<RolResponseDTO> getRolById(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(rolService.findById(id));
@@ -37,7 +37,7 @@ public class RolRestController {
     }
 
     @PreAuthorize("hasRole('Idareci')")
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<RolResponseDTO> createRol(@RequestBody RolRequestDTO dto) {
         validateRolTuru(dto.getRolTuru());
         RolResponseDTO created = rolService.save(dto);
@@ -45,7 +45,7 @@ public class RolRestController {
     }
 
     @PreAuthorize("hasRole('Idareci')")
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<RolResponseDTO> updateRol(@PathVariable Long id, @RequestBody RolRequestDTO dto) {
         validateRolTuru(dto.getRolTuru());
         RolResponseDTO updated = rolService.update(id, dto);
@@ -53,7 +53,7 @@ public class RolRestController {
     }
 
     @PreAuthorize("hasRole('Idareci')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteRol(@PathVariable Long id) {
         rolService.deleteById(id);
         return ResponseEntity.noContent().build();

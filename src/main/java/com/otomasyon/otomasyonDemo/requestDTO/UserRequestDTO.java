@@ -1,5 +1,6 @@
 package com.otomasyon.otomasyonDemo.requestDTO;
 
+import com.otomasyon.otomasyonDemo.responseDTO.RolResponseDTO;
 import lombok.*;
 
 @Getter
@@ -14,6 +15,7 @@ public class UserRequestDTO {
     private String adres;
     private String telefon;
     private String password;
-    private String rol;
+    private Long rolId;
     private boolean sifreGuncelligi;
+
 }

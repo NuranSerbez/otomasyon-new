@@ -50,17 +50,28 @@ public class BolumServiceImpl implements BolumService {
 
     @Override
     public BolumResponseDTO save(BolumRequestDTO bolumDTO) {
-        Bolum bolum = bolumMapper.toEntity(bolumDTO);
-        return bolumMapper.toDTO(bolumRepository.save(bolum));
-    }
+        Fakulte fakulte = fakulteRepository.findById(bolumDTO.getFakulte().getId())
+                .orElseThrow(() -> new RuntimeException("Fakülte bulunamadı"));
 
+        Program program = programRepository.findById(bolumDTO.getProgram().getId())
+                .orElseThrow(() -> new RuntimeException("Program bulunamadı"));
+
+        Bolum bolum = new Bolum();
+        bolum.setBolumAdi(bolumDTO.getBolumAdi());
+        bolum.setFakulte(fakulte);
+        bolum.setProgram(program);
+
+        Bolum savedBolum = bolumRepository.save(bolum);
+
+        return bolumMapper.toDTO(savedBolum);
+    }
     @Override
     public BolumResponseDTO update(Long id, BolumRequestDTO bolumDTO) {
         Bolum bolum = bolumRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Bölüm bulunamadı: " + id));
-        Program program = bolumMapper.mapProgram(Long.valueOf(bolumDTO.getProgram()));
+        Program program = bolumMapper.mapProgram(bolumDTO.getProgram().getId());
         bolum.setProgram(program);
-        Fakulte fakulte = bolumMapper.mapFakulte(Long.valueOf(bolumDTO.getFakulte()));
+        Fakulte fakulte = bolumMapper.mapFakulte(bolumDTO.getFakulte().getId());
         bolum.setFakulte(fakulte);
         Bolum updatedBolum = bolumRepository.save(bolum);
         return bolumMapper.toDTO(updatedBolum);
