@@ -19,9 +19,9 @@ public class Rol {
     private RolTuru rolTuru;
 
     public enum RolTuru {
-        IDARECI,
+        OGRENCI,
         AKADEMISYEN,
-        OGRENCI
+        IDARECI
     }
 
 //    public void setRolTuruFromString(String rolTuruStr) {

@@ -7,7 +7,6 @@ import com.otomasyon.otomasyonDemo.serviceInterface.RolService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -20,13 +19,11 @@ public class RolRestController {
 
     private final RolService rolService;
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/all")
     public ResponseEntity<List<RolResponseDTO>> getAllRoles() {
         return ResponseEntity.ok(rolService.findAll());
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @GetMapping("/id/{id}")
     public ResponseEntity<RolResponseDTO> getRolById(@PathVariable Long id) {
         try {
@@ -36,7 +33,6 @@ public class RolRestController {
         }
     }
 
-    @PreAuthorize("hasRole('Idareci')")
     @PostMapping("/add")
     public ResponseEntity<RolResponseDTO> createRol(@RequestBody RolRequestDTO dto) {
         validateRolTuru(dto.getRolTuru());
@@ -44,7 +40,6 @@ public class RolRestController {
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
-    @PreAuthorize("hasRole('Idareci')")
     @PutMapping("/update/{id}")
     public ResponseEntity<RolResponseDTO> updateRol(@PathVariable Long id, @RequestBody RolRequestDTO dto) {
         validateRolTuru(dto.getRolTuru());
@@ -52,7 +47,6 @@ public class RolRestController {
         return ResponseEntity.ok(updated);
     }
 
-    @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteRol(@PathVariable Long id) {
         rolService.deleteById(id);

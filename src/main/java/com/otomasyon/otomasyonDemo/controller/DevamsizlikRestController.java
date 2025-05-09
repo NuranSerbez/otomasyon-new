@@ -6,7 +6,6 @@ import com.otomasyon.otomasyonDemo.serviceInterface.DevamsizlikService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,14 +18,12 @@ public class DevamsizlikRestController {
 
     private final DevamsizlikService devamsizlikService;
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/all")
     public ResponseEntity<List<DevamsizlikResponseDTO>> findAll() {
         List<DevamsizlikResponseDTO> list = devamsizlikService.findAll();
         return ResponseEntity.ok(list);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/id/{id}")
     public ResponseEntity<DevamsizlikResponseDTO> getById(@PathVariable Long id) {
         DevamsizlikResponseDTO response = devamsizlikService.findById(id);
@@ -36,7 +33,6 @@ public class DevamsizlikRestController {
         return ResponseEntity.ok(response);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PostMapping("/add")
     public ResponseEntity<DevamsizlikResponseDTO> add(@RequestBody DevamsizlikRequestDTO dto) {
         if (dto.getDersAtamaId() == null) {
@@ -47,7 +43,6 @@ public class DevamsizlikRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PutMapping("/update/{id}")
     public ResponseEntity<DevamsizlikResponseDTO> update(@PathVariable Long id, @RequestBody DevamsizlikRequestDTO dto) {
         if (dto.getDersAtamaId() == null) {
@@ -62,7 +57,6 @@ public class DevamsizlikRestController {
         return ResponseEntity.ok(updated);
     }
 
-    @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         DevamsizlikResponseDTO existing = devamsizlikService.findById(id);

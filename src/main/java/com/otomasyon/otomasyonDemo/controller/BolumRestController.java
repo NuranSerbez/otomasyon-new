@@ -1,8 +1,5 @@
 package com.otomasyon.otomasyonDemo.controller;
 
-import com.otomasyon.otomasyonDemo.entity.Bolum;
-import com.otomasyon.otomasyonDemo.entity.Fakulte;
-import com.otomasyon.otomasyonDemo.entity.Program;
 import com.otomasyon.otomasyonDemo.requestDTO.BolumRequestDTO;
 import com.otomasyon.otomasyonDemo.responseDTO.BolumResponseDTO;
 import com.otomasyon.otomasyonDemo.serviceInterface.BolumService;
@@ -10,7 +7,6 @@ import com.otomasyon.otomasyonDemo.serviceInterface.FakulteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -24,14 +20,12 @@ public class BolumRestController {
     private final BolumService bolumService;
     private final FakulteService fakulteService;
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/all")
     public ResponseEntity<List<BolumResponseDTO>> findAll() {
         List<BolumResponseDTO> bolumList = bolumService.findAll();
         return ResponseEntity.ok(bolumList);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/id/{id}")
     public ResponseEntity<BolumResponseDTO> getById(@PathVariable Long id) {
         BolumResponseDTO bolum = bolumService.findById(id);
@@ -41,7 +35,6 @@ public class BolumRestController {
         return ResponseEntity.ok(bolum);
     }
 
-    @PreAuthorize("hasRole('Idareci')")
     @PostMapping("/add")
     public ResponseEntity<BolumResponseDTO> add(@RequestBody BolumRequestDTO dto) {
         if (dto.getFakulte() == null || dto.getFakulte().getId() == null) {
@@ -56,7 +49,6 @@ public class BolumRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdBolum);
     }
 
-    @PreAuthorize("hasRole('Idareci')")
     @PutMapping("/update/{id}")
     public ResponseEntity<BolumResponseDTO> update(@PathVariable Long id, @RequestBody BolumRequestDTO dto) {
         if (dto.getFakulte() == null || fakulteService.findById(dto.getFakulte().getId()) == null) {
@@ -71,7 +63,6 @@ public class BolumRestController {
         return ResponseEntity.ok(updatedBolum);
     }
 
-    @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         BolumResponseDTO existing = bolumService.findById(id);

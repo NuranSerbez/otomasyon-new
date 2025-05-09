@@ -41,7 +41,7 @@ public class User {
     @Column(name = "password", nullable = false, length = 255)
     private String password;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "rol_id")
     @JsonBackReference("rol-reference")
     private Rol rol;

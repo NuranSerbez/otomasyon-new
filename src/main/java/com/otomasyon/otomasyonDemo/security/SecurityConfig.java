@@ -1,59 +1,62 @@
 package com.otomasyon.otomasyonDemo.security;
 
+import com.otomasyon.otomasyonDemo.auth.JwtTokenFilter;
+import com.otomasyon.otomasyonDemo.auth.TokenManager;
+import com.otomasyon.otomasyonDemo.auth.UserDetailService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-
-import static org.springframework.security.config.Customizer.withDefaults;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
+@RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final UserDetailService userDetailService;
+    private final TokenManager tokenManager;
+
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        return http.getSharedObject(AuthenticationManagerBuilder.class)
+                .userDetailsService(userDetailService)
+                .passwordEncoder(passwordEncoder())
+                .and()
+                .build();
+    }
 
-        manager.createUser(User.withUsername("idareci")
-                .password(passwordEncoder.encode("1234"))
-                .roles("Idareci")
-                .build());
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("OGRENCI", "IDARECI", "AKADEMISYEN")
+                        .requestMatchers(HttpMethod.POST, "/api/**").hasAnyRole("IDARECI", "AKADEMISYEN")
+                        .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("IDARECI")
+                        .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("IDARECI")
+                        .anyRequest().authenticated()
+                );
+        http.addFilterBefore(new JwtTokenFilter(tokenManager, userDetailService),
+                UsernamePasswordAuthenticationFilter.class);
 
-        manager.createUser(User.withUsername("akademisyen")
-                .password(passwordEncoder.encode("1234"))
-                .roles("Akademisyen")
-                .build());
-
-        manager.createUser(User.withUsername("ogrenci")
-                .password(passwordEncoder.encode("1234"))
-                .roles("Ogrenci")
-                .build());
-
-        return manager;
+        return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-    @Bean
-    public SecurityFilterChain securityFilterChain(org.springframework.security.config.annotation.web.builders.HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**").authenticated()
-                        .anyRequest().permitAll()
-                )
-                .httpBasic(withDefaults());
-
-        return http.build();
     }
 }

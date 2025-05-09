@@ -8,7 +8,6 @@ import com.otomasyon.otomasyonDemo.serviceInterface.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -22,19 +21,16 @@ public class UserRestController {
     private final UserService userService;
     private final RolService rolService;
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/all")
     public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
         return ResponseEntity.ok(userService.findAll());
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/id/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.findById(id));
     }
 
-    @PreAuthorize("hasRole('Idareci')")
     @PostMapping("/add")
     public ResponseEntity<UserResponseDTO> createUser(@RequestBody UserRequestDTO userDTO) {
         if (userDTO.getRolId() == null) {
@@ -44,7 +40,6 @@ public class UserRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
-    @PreAuthorize("hasRole('Idareci')")
     @PutMapping("/update/{id}")
     public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @RequestBody UserRequestDTO userDTO) {
         if (userDTO.getRolId() == null) {
@@ -55,8 +50,6 @@ public class UserRestController {
         return ResponseEntity.ok(updatedUser);
     }
 
-
-    @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteById(id);

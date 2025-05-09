@@ -6,7 +6,6 @@ import com.otomasyon.otomasyonDemo.serviceInterface.DersAtamaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,14 +18,12 @@ public class DersAtamaRestController {
 
     private final DersAtamaService dersAtamaService;
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/all")
     public ResponseEntity<List<DersAtamaResponseDTO>> findAll() {
         List<DersAtamaResponseDTO> dersAtamaList = dersAtamaService.findAll();
         return ResponseEntity.ok(dersAtamaList);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/id/{id}")
     public ResponseEntity<DersAtamaResponseDTO> getById(@PathVariable Long id) {
         DersAtamaResponseDTO dersAtama = dersAtamaService.findById(id);
@@ -36,7 +33,6 @@ public class DersAtamaRestController {
         return ResponseEntity.ok(dersAtama);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PostMapping("/add")
     public ResponseEntity<DersAtamaResponseDTO> add(@RequestBody DersAtamaRequestDTO dto) {
         if (dto.getDersId() == null || dto.getUserId() == null) {
@@ -47,7 +43,6 @@ public class DersAtamaRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PutMapping("/update/{id}")
     public ResponseEntity<DersAtamaResponseDTO> update(@PathVariable Long id, @RequestBody DersAtamaRequestDTO dto) {
         if (dto.getDersId() == null || dto.getUserId() == null) {
@@ -62,7 +57,6 @@ public class DersAtamaRestController {
         return ResponseEntity.ok(updated);
     }
 
-    @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         DersAtamaResponseDTO existing = dersAtamaService.findById(id);

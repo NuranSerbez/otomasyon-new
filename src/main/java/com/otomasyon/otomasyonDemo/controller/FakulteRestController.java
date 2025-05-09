@@ -8,7 +8,6 @@ import com.otomasyon.otomasyonDemo.serviceInterface.FakulteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -27,7 +26,6 @@ public class FakulteRestController {
         this.objectMapper = objectMapper;
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
 
     @GetMapping("/all")
     public List<FakulteResponseDTO> findAll() {
@@ -35,7 +33,6 @@ public class FakulteRestController {
        return fakulteList;
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/id/{id}")
     public ResponseEntity<FakulteResponseDTO> getFakulte(@PathVariable Long id) {
         FakulteResponseDTO fakulte = fakulteService.findById(id);
@@ -45,14 +42,12 @@ public class FakulteRestController {
         return ResponseEntity.ok(fakulte);
     }
 
-    @PreAuthorize("hasRole('Idareci')")
     @PostMapping("/add")
     public ResponseEntity<FakulteResponseDTO> addFakulte(@RequestBody FakulteRequestDTO fakulteDTO) {
         FakulteResponseDTO createdFakulte = fakulteService.save(fakulteDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdFakulte);
     }
 
-    @PreAuthorize("hasRole('Idareci')")
     @PutMapping("/update/{id}")
     public ResponseEntity<FakulteResponseDTO> updateFakulte(@PathVariable Long id, @RequestBody FakulteRequestDTO fakulteDTO) {
         FakulteResponseDTO updatedFakulte = fakulteService.update(id, fakulteDTO);
@@ -62,7 +57,6 @@ public class FakulteRestController {
         return ResponseEntity.ok(updatedFakulte);
     }
 
-    @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteFakulte(@PathVariable Long id) {
         FakulteResponseDTO fakulte = fakulteService.findById(id);

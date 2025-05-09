@@ -6,7 +6,6 @@ import com.otomasyon.otomasyonDemo.serviceInterface.CevapService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,14 +18,12 @@ public class CevapRestController {
 
     private final CevapService cevapService;
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/all")
     public ResponseEntity<List<CevapResponseDTO>> findAll() {
         List<CevapResponseDTO> cevapList = cevapService.findAll();
         return ResponseEntity.ok(cevapList);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/id/{id}")
     public ResponseEntity<CevapResponseDTO> getById(@PathVariable Long id) {
         CevapResponseDTO cevap = cevapService.findById(id);
@@ -36,7 +33,6 @@ public class CevapRestController {
         return ResponseEntity.ok(cevap);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PostMapping("/add")
     public ResponseEntity<CevapResponseDTO> add(@RequestBody CevapRequestDTO dto) {
         if (dto.getDegerlendirme() == null || dto.getSoru() == null) {
@@ -47,7 +43,6 @@ public class CevapRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PutMapping("/update/{id}")
     public ResponseEntity<CevapResponseDTO> update(@PathVariable Long id, @RequestBody CevapRequestDTO dto) {
         if (dto.getDegerlendirme() == null || dto.getSoru() == null) {
@@ -62,7 +57,6 @@ public class CevapRestController {
         return ResponseEntity.ok(updated);
     }
 
-    @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         CevapResponseDTO existing = cevapService.findById(id);

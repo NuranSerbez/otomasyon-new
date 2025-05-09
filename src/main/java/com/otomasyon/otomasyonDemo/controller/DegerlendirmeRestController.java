@@ -6,7 +6,6 @@ import com.otomasyon.otomasyonDemo.serviceInterface.DegerlendirmeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,14 +18,12 @@ public class DegerlendirmeRestController {
 
     private final DegerlendirmeService degerlendirmeService;
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/all")
     public ResponseEntity<List<DegerlendirmeResponseDTO>> findAll() {
         List<DegerlendirmeResponseDTO> degerlendirmeList = degerlendirmeService.findAll();
         return ResponseEntity.ok(degerlendirmeList);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/id/{id}")
     public ResponseEntity<DegerlendirmeResponseDTO> getById(@PathVariable Long id) {
         DegerlendirmeResponseDTO degerlendirme = degerlendirmeService.findById(id);
@@ -36,7 +33,6 @@ public class DegerlendirmeRestController {
         return ResponseEntity.ok(degerlendirme);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PostMapping("/add")
     public ResponseEntity<DegerlendirmeResponseDTO> add(@RequestBody DegerlendirmeRequestDTO dto) {
         if (dto.getOgrenciId() == null || dto.getAkademisyenId() == null) {
@@ -47,7 +43,6 @@ public class DegerlendirmeRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PutMapping("/update/{id}")
     public ResponseEntity<DegerlendirmeResponseDTO> update(@PathVariable Long id, @RequestBody DegerlendirmeRequestDTO dto) {
         if (dto.getOgrenciId() == null || dto.getAkademisyenId() == null) {
@@ -62,7 +57,6 @@ public class DegerlendirmeRestController {
         return ResponseEntity.ok(updated);
     }
 
-    @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         DegerlendirmeResponseDTO existing = degerlendirmeService.findById(id);

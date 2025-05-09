@@ -6,7 +6,6 @@ import com.otomasyon.otomasyonDemo.serviceInterface.DersService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,14 +18,12 @@ public class DersRestController {
 
     private final DersService dersService;
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/all")
     public ResponseEntity<List<DersResponseDTO>> findAll() {
         List<DersResponseDTO> dersList = dersService.findAll();
         return ResponseEntity.ok(dersList);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen', 'Ogrenci')")
     @GetMapping("/id/{id}")
     public ResponseEntity<DersResponseDTO> getById(@PathVariable Long id) {
         DersResponseDTO ders = dersService.findById(id);
@@ -36,7 +33,6 @@ public class DersRestController {
         return ResponseEntity.ok(ders);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PostMapping("/add")
     public ResponseEntity<DersResponseDTO> add(@RequestBody DersRequestDTO dto) {
         if (dto.getProgramId() == null || dto.getUserId() == null) {
@@ -47,7 +43,6 @@ public class DersRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PreAuthorize("hasAnyRole('Idareci', 'Akademisyen')")
     @PutMapping("/update/{id}")
     public ResponseEntity<DersResponseDTO> update(@PathVariable Long id, @RequestBody DersRequestDTO dto) {
         if (dto.getProgramId() == null || dto.getUserId() == null) {
@@ -62,7 +57,6 @@ public class DersRestController {
         return ResponseEntity.ok(updated);
     }
 
-    @PreAuthorize("hasRole('Idareci')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         DersResponseDTO existing = dersService.findById(id);
