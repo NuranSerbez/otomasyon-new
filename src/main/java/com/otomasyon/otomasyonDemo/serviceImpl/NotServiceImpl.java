@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 @Service
 public class NotServiceImpl implements NotService {
 
@@ -49,7 +48,8 @@ public class NotServiceImpl implements NotService {
     @Override
     public NotResponseDTO save(NotRequestDTO notDTO) {
         Not not = notMapper.toEntity(notDTO);
-        return notMapper.toDTO(notRepository.save(not));
+        Not savedNot = notRepository.save(not);
+        return notMapper.toDTO(savedNot);
     }
 
     @Override
@@ -59,6 +59,9 @@ public class NotServiceImpl implements NotService {
 
         DersAtama dersAtama = notMapper.mapDersAtama(notDTO.getDersAtamaId());
         not.setDersAtama(dersAtama);
+
+        not.setVize(notDTO.getVize());
+        not.setFinl(notDTO.getFinl());
 
         Not updatedNot = notRepository.save(not);
         return notMapper.toDTO(updatedNot);

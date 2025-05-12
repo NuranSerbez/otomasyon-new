@@ -29,4 +29,10 @@ public class Not {
     @JoinColumn(name = "ders")
     @JsonBackReference("ders-references")
     private DersAtama dersAtama;
+
+    @PrePersist
+    @PreUpdate
+    public void calculateOrtalama() {
+        this.ortalama = (int) ((this.vize * 0.4) + (this.finl * 0.6));
+    }
 }

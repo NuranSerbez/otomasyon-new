@@ -20,7 +20,7 @@ public interface NotMapper {
     @Mapping(source = "dersAtamaId", target = "dersAtama")
     @Mapping(source = "vize", target = "vize")
     @Mapping(source = "finl", target = "finl")
-    @Mapping(source = "ortalama", target = "ortalama")
+    @Mapping(target = "ortalama", ignore = true)
     Not toEntity(NotRequestDTO dto);
 
     default DersAtama mapDersAtama(Long dersAtamaId) {
@@ -30,4 +30,3 @@ public interface NotMapper {
         return dersAtama;
     }
 }
-

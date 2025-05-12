@@ -10,6 +10,4 @@ public class NotRequestDTO {
     private Long dersAtamaId;
     private int vize;
     private int finl;
-    private int ortalama;
-
 }
