@@ -3,6 +3,7 @@ package com.otomasyon.otomasyonDemo.controller;
 import com.otomasyon.otomasyonDemo.auth.TokenManager;
 import com.otomasyon.otomasyonDemo.entity.Rol;
 import com.otomasyon.otomasyonDemo.entity.User;
+import com.otomasyon.otomasyonDemo.login.ChangePasswordDTO;
 import com.otomasyon.otomasyonDemo.login.LoginDTO;
 import com.otomasyon.otomasyonDemo.repository.RolRepository;
 import com.otomasyon.otomasyonDemo.repository.UserRepository;
@@ -49,9 +50,19 @@ public class AuthRestController {
                 authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword())
                 );
+                User user = userRepository.findByEmail(loginDTO.getEmail());
+                if (user == null) {
+                    throw new IllegalArgumentException("User not found");
+                }
+                String token = tokenManager.generateToken(user.getEmail());
                 HttpHeaders headers = new HttpHeaders();
-                headers.set("Authorization", "Bearer " + tokenManager.generateToken(loginDTO.getEmail()));
-                return ResponseEntity.ok().headers(headers).body("Login Success");
+                headers.set("Authorization", "Bearer " + token);
+
+                String responseMessage = user.isSifreGuncelligi()
+                        ? "Login success."
+                        : "Login success. Please change your password.";
+
+                return ResponseEntity.ok().headers(headers).body(responseMessage);
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The email or password is incorrect.");
         } catch (Exception e) {
@@ -63,27 +74,24 @@ public class AuthRestController {
     @PostMapping("/signup")
     public ResponseEntity<String> signUp(@RequestBody LoginDTO loginDTO) {
         try {
-            if (loginDTO != null && loginDTO.getEmail() != null && loginDTO.getPassword() != null) {
+            if (loginDTO != null && loginDTO.getEmail() != null && loginDTO.getTckn() != null) {
                 if (userRepository.existsByEmail(loginDTO.getEmail())) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email is already in use.");
                 }
-
                 Rol.RolTuru girilenRol;
                 try {
                     girilenRol = Rol.RolTuru.valueOf(loginDTO.getRol().toUpperCase());
                 } catch (IllegalArgumentException e) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid role specified.");
                 }
-
                 Rol rol = rolRepository.findByRolTuru(girilenRol)
                         .orElseThrow(() -> new RuntimeException("Role not found."));
-
                 User newUser = new User();
                 newUser.setEmail(loginDTO.getEmail());
-                newUser.setPassword(passwordEncoder.encode(loginDTO.getPassword()));
-                newUser.setRol(rol);
                 newUser.setTckn(loginDTO.getTckn());
-
+                newUser.setPassword(passwordEncoder.encode(loginDTO.getTckn()));
+                newUser.setSifreGuncelligi(false);
+                newUser.setRol(rol);
                 userRepository.save(newUser);
                 return ResponseEntity.ok(loginDTO.getEmail() + " has been successfully registered with role: " + girilenRol);
             }
@@ -93,5 +101,28 @@ public class AuthRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Signup failed.");
         }
     }
+    @PutMapping("/change-password")
+    public ResponseEntity<String> changePassword(@RequestHeader("Authorization") String authHeader,
+                                                 @RequestBody ChangePasswordDTO dto) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            String email = tokenManager.extractUsername(token);
+            User user = userRepository.findByEmail(email);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+            }
 
+            if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Current password is incorrect.");
+            }
+
+            user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+            user.setSifreGuncelligi(true);
+            userRepository.save(user);
+
+            return ResponseEntity.ok("Password successfully changed.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Password change failed.");
+        }
+    }
 }

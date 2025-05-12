@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -28,12 +29,8 @@ public class SecurityConfig {
     private final TokenManager tokenManager;
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class)
-                .userDetailsService(userDetailService)
-                .passwordEncoder(passwordEncoder())
-                .and()
-                .build();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 
     @Bean
@@ -42,13 +39,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/**").permitAll() // login/signup serbest
                         .requestMatchers(HttpMethod.GET, "/api/**").hasAnyRole("OGRENCI", "IDARECI", "AKADEMISYEN")
                         .requestMatchers(HttpMethod.POST, "/api/**").hasAnyRole("IDARECI", "AKADEMISYEN")
                         .requestMatchers(HttpMethod.PUT, "/api/**").hasRole("IDARECI")
                         .requestMatchers(HttpMethod.DELETE, "/api/**").hasRole("IDARECI")
                         .anyRequest().authenticated()
                 );
+
         http.addFilterBefore(new JwtTokenFilter(tokenManager, userDetailService),
                 UsernamePasswordAuthenticationFilter.class);
 
